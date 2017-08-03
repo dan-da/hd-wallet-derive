@@ -1,0 +1,12 @@
+{
+    "name": "dan-da/hd-wallet-derive",
+
+    "require": {
+        "bitwasp/bitcoin": ">=0.0.19",
+        "ext-json": "*",
+        "php": ">=5.5"
+    },
+
+    "require-dev": {
+    }
+}
