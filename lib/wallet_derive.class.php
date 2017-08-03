@@ -17,10 +17,6 @@ require_once __DIR__ . '/mysqlutil.class.php';
 // For generating html tables.
 require_once __DIR__ . '/html_table.class.php';
 
-// For blockchain API calls via various providers.
-require_once __DIR__ . '/blockchain_api.php';
-
-
 /* A class that implements HD wallet key/address derivation
  */
 class wallet_derive {
