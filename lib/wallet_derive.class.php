@@ -55,10 +55,14 @@ class wallet_derive {
             $address = $master->getPublicKey()->getAddress()->getAddress();
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
+            $pubkey = $master->getPublicKey()->getHex();
+            $pubkeyhash = $master->getPublicKey()->getPubKeyHash()->getHex();
             $xpub = $master->toExtendedPublicKey($network);
-            
+
             $addrs[] = array( 'xprv' => $xprv,
                               'privkey' => $wif,
+                              'pubkey' => $pubkey,
+                              'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
                               'index' => null,
@@ -79,14 +83,18 @@ class wallet_derive {
                 // bip32 path
                 $address = $key->getPublicKey()->getAddress()->getAddress();
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
-                $wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
+                $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
+                $pubkey = $key->getPublicKey()->getHex();
+                $pubkeyhash = $key->getPublicKey()->getPubKeyHash()->getHex();
                 $xpub = $key->toExtendedPublicKey($network);
             }
             else {
                 throw new Exception("multisig keys not supported");
             }
             $addrs[] = array( 'xprv' => $xprv,
-                              'privkey' => $wif,
+                              'privkey' => $priv_wif,
+                              'pubkey' => $pubkey,
+                              'pubkeyhash' => $pubkeyhash,
                               'xpub' => $xpub,
                               'address' => $address,
                               'index' => $i,
@@ -115,13 +123,13 @@ class wallet_derive {
     /* Returns all columns available for reports
      */
     static public function all_cols() {
-        return ['path', 'xprv', 'xpub', 'privkey', 'address', 'index'];
+        return ['path', 'address', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
     }
 
     /* Returns default reporting columns
      */
     static public function default_cols() {
-        return ['path', 'privkey', 'address'];
+        return ['path', 'address', 'privkey'];
     }
 }
 

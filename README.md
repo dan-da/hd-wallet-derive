@@ -26,13 +26,13 @@ this key.
 ```
 $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --numderive=3
 
-+------+------------------------------------------------------+------------------------------------+
-| path | privkey                                              | address                            |
-+------+------------------------------------------------------+------------------------------------+
-| m/0  | L4mgN3QEzR9PT6zPeKXGk3xNiGxxkHu4575W9YwBSRV2sRiyjV4g | 1A9X6wjnER55GMpCCsTjn973y56u3zviDe |
-| m/1  | L1xYoR7VS6vuvkmfRM4ubaH84vRkWKUS2PmYj9DPTS76NQ4NtZP9 | 192oE3o29AAoBPQiTYe65kRU2zoBLpEnUm |
-| m/2  | L21sVq8wutBSQWTzVJVBTeCdkfTgw41dK3PPViZ3Ds2xnMq8RMbK | 1BbtRW5sua3Ewhm8jHAURUiz9t4bw8TQo9 |
-+------+------------------------------------------------------+------------------------------------+```
++------+------------------------------------+------------------------------------------------------+
+| path | address                            | privkey                                              |
++------+------------------------------------+------------------------------------------------------+
+| m/0  | 1A9X6wjnER55GMpCCsTjn973y56u3zviDe | L4mgN3QEzR9PT6zPeKXGk3xNiGxxkHu4575W9YwBSRV2sRiyjV4g |
+| m/1  | 192oE3o29AAoBPQiTYe65kRU2zoBLpEnUm | L1xYoR7VS6vuvkmfRM4ubaH84vRkWKUS2PmYj9DPTS76NQ4NtZP9 |
+| m/2  | 1BbtRW5sua3Ewhm8jHAURUiz9t4bw8TQo9 | L21sVq8wutBSQWTzVJVBTeCdkfTgw41dK3PPViZ3Ds2xnMq8RMbK |
++------+------------------------------------+------------------------------------------------------+
 ```
 
 ## Deriving change addresses and showing all columns.
@@ -53,29 +53,48 @@ can easily obtain the xpub key for our xprv key.
 ```
 $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --path=m/1 --cols=all --includeroot --numderive=3
 
-+-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-| path  | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | address                            | index |
-+-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-| m     | xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c | xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9 | L1pbvV86crAGoDzqmgY85xURkz3c435Z9nirMt52UbnGjYMzKBUN | 1CHCnCjgMNb6digimckNQ6TBVcTWBAmPHK |       |
-| m/1/0 | xprv9yJyMFmJjNAiXqf3yfT6NvWCkXo1PTdYw6x5sj6fH2ePRVL4N4wy8weFYJnMKxNEib9HFyS7pc69rE3tmw7FfWhshBc17wHcKsNHByt4SZC | xpub6CJKkmJCZjj1kKjX5gz6k4SwJZdVnvMQJKsgg7WGqNBNJHfCucGDgjxjPcHY9QZJCne3tubbtucYmpt7a7u1Xx3oNumZRVytpa2UdFjTr47 | KxcccHPiLz7sxUVShX9THgfH6i8D6m3iAkHtgGuB87Tm3maz8Jas | 1qhp7SiuVmxo3WKca7zHMkKjvjkGXs29d  |     0 |
-| m/1/1 | xprv9yJyMFmJjNAiZ2NDkwj7Jcjo8AtdJTPYXF5bBLGUYh8NNid9bgAfuhNtSEco35mLrBzPPRTaA5XeezrtPxn59MsYBzjRZt6XqGW2T87JiS4 | xpub6CJKkmJCZjj1mWSgryG7fkgXgCj7hv7PtU1Byig672fMFWxJ9DUvTVhNHVA8ciGkqrwaqDW6Mvmr4ihT3EoqjgNK6s5P6C9X7UBLX5Trzw6 | KyxHznKrz1Y6jmE5fxnHh1e2AZLNCtDjnF86cZzk8F5S8nBxfqfc | 1N3vKW2KGeKocao9eae6kVyYL8GNLzW8yd |     1 |
-| m/1/2 | xprv9yJyMFmJjNAibyUzvGgfpk8igy6DpCtjWQ6C5oVmXyUhqak5J2xj6K2y7o3qn22nAvt14cLjRQEXVpGRZoc3ULJHomWmkUTTPJCEaF4rZPr | xpub6CJKkmJCZjj1pTZU2JDgBt5TEzviDfcasd1ntBuP6K1giP5DqaGye7MSy5MYFWoGtVhvK8Ko2XW4JRMtKjMXctpPxcjRMjM47AqeWiZLKKN | L1AFnZ6JJyGRxLG9QoCTDzeLzLV617XtgLy8DrXCyLnPG6L1n7xo | 17XRz7oPJLUNp5uf66BeqTmSDuRwqz3aW4 |     2 |
-+-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
++-------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+--------------------------------------------------------------------+-------+
+| path  | address                            | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | pubkey                                                             | pubkeyhash                                                         | index |
++-------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+--------------------------------------------------------------------+-------+
+| m     | 1CHCnCjgMNb6digimckNQ6TBVcTWBAmPHK | xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c | xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9 | L1pbvV86crAGoDzqmgY85xURkz3c435Z9nirMt52UbnGjYMzKBUN | 0212b55b9431515c7185355f15b48c5e1a1bbfa31af61429fa2bb8709de722f420 | 0212b55b9431515c7185355f15b48c5e1a1bbfa31af61429fa2bb8709de722f420 |       |
+| m/1/0 | 1qhp7SiuVmxo3WKca7zHMkKjvjkGXs29d  | xprv9yJyMFmJjNAiXqf3yfT6NvWCkXo1PTdYw6x5sj6fH2ePRVL4N4wy8weFYJnMKxNEib9HFyS7pc69rE3tmw7FfWhshBc17wHcKsNHByt4SZC | xpub6CJKkmJCZjj1kKjX5gz6k4SwJZdVnvMQJKsgg7WGqNBNJHfCucGDgjxjPcHY9QZJCne3tubbtucYmpt7a7u1Xx3oNumZRVytpa2UdFjTr47 | KxcccHPiLz7sxUVShX9THgfH6i8D6m3iAkHtgGuB87Tm3maz8Jas | 036f45f7040f0f41068d7bcb45dbd28550be6739cfdbe16739e27cfa44e60083c3 | 093608d6a29e55873e2d1facacf6631961a4e8ed                           |     0 |
+| m/1/1 | 1N3vKW2KGeKocao9eae6kVyYL8GNLzW8yd | xprv9yJyMFmJjNAiZ2NDkwj7Jcjo8AtdJTPYXF5bBLGUYh8NNid9bgAfuhNtSEco35mLrBzPPRTaA5XeezrtPxn59MsYBzjRZt6XqGW2T87JiS4 | xpub6CJKkmJCZjj1mWSgryG7fkgXgCj7hv7PtU1Byig672fMFWxJ9DUvTVhNHVA8ciGkqrwaqDW6Mvmr4ihT3EoqjgNK6s5P6C9X7UBLX5Trzw6 | KyxHznKrz1Y6jmE5fxnHh1e2AZLNCtDjnF86cZzk8F5S8nBxfqfc | 021107c4523fb021ad5c8e5ae086b8d162ebd755df80100e26c9d4cb5c7caaa3ba | e6e7fb588626c0568fbb898edf098725ac0b8736                           |     1 |
+| m/1/2 | 17XRz7oPJLUNp5uf66BeqTmSDuRwqz3aW4 | xprv9yJyMFmJjNAibyUzvGgfpk8igy6DpCtjWQ6C5oVmXyUhqak5J2xj6K2y7o3qn22nAvt14cLjRQEXVpGRZoc3ULJHomWmkUTTPJCEaF4rZPr | xpub6CJKkmJCZjj1pTZU2JDgBt5TEzviDfcasd1ntBuP6K1giP5DqaGye7MSy5MYFWoGtVhvK8Ko2XW4JRMtKjMXctpPxcjRMjM47AqeWiZLKKN | L1AFnZ6JJyGRxLG9QoCTDzeLzLV617XtgLy8DrXCyLnPG6L1n7xo | 031d715e0943dd94df91771397d0cb75db46279da4bbd64596652ce2e1b36da74a | 479216fd27805445fc564410c1c5e83139b39005                           |     2 |
++-------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+--------------------------------------------------------------------+-------+
 ```
 
-## Derive addresses from bip39 mnemonic seed words.
+## Derive addresses from bip39 mnemonic seed words. (no password)
 
 ```
-$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask blah adfadsfadsfadsfadsfadsf"  -g --includeroot  --numderive=2 --cols=all
+$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" --path="m/44'/0'/0'/0"  -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
 
-+------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-| path | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | address                            | index |
-+------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-| m    | xprv9s21ZrQH143K4CTyEk32W1CTegxHiBhPymLeqhqiuwcC1nRHRJKVi1ALq7fa7eeqkBEv6SNbfMqKv8Pxecr3eCG4W32NYeAC1gEc6GTaJ8c | xpub661MyMwAqRbcGgYSLma2s99CCinn7eRFLzGFe6FLUH9AtakRxqdkFoUpgQezcBfw1mv7Qpk5w855BLA227mYfLj17BCmGuR57PSspgtKebV | KxMvKHv6fyNWZyi5nnURRXHoxBHr5ij2N68RmKwmjgi4Wj2y9HqL | 1GdfFaJALCAMjbXD5g8h2cvayvnjCUUge5 |       |
-| m/0  | xprv9vAFEsVvB5BRU8FL81ims4W2AghDqAvo98FfcHRVtVqHAFjx96jLmaDLCokzZYs8fFajSW7ToEbx8SjDG9qMJyyNNDojXrQytVXvKq6ByMG | xpub699beP2p1SjigcKoE3FnECSkiiXiEdeeWMBGQfq7SqNG3456ge3bKNXp449ZeZ3ZsGPwtV8mx5SLgatv4jtZEJWPhsfa2aEotrDeeHdrcXw | L3FEHQEiq1jF7mnS3v8pDZw2wTKE22DQ9f9UhphJMepJv5XkjiLE | 148CyDkNig2KX8JBEp7Q7osof94yX35ZMw |     0 |
-| m/1  | xprv9vAFEsVvB5BRWCtf8Dco1t99zSyoVBn3JPHd2BW9qXxvrKEwNrKCctUsSun1vT4RQddGnnRMMCTG9DQQsM6oczv4GumRBbQwNnTZ4ctsPYu | xpub699beP2p1Sjiigy8EF9oP25tYUpHteVtfcDDpZumPsVuj7a5vPdTAgoMJEWyhFCpdsH1MhCnqEMYAsmxnNTWRLw46nax64k75pcSwc5yKUQ | KwchLem2rn58g9zRDPamsuP35t4YYySaixtC9niBidAM8RP5VCJc | 1LYP3U4SSU4qmp8GgShhoqNSzyktvx9rMw |     1 |
-+------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
++-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| path            | address                            | privkey                                              | pubkey                                                             | xprv                                                                                                            |
++-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| m               | 15UL8r2hkZpwi7RrQzWo6fYxfzdWL8mguG | L4jtNUY2YZfARajhSzq66RCBcfB8ZaXUYVHXD3q2q8SdMGaS7HpX | 03fa47f99f33e208cf46f42bdfc120843808a6558fa77a7806124f3b00be900b4a | xprv9s21ZrQH143K2vBDZaAMUvqS1MBuyNyisggeeGiUdMpi956vyGmkX81BapU6oD2c1qHnQYETcd85Z7i4GfmBz2TCz9PDQrxHjd3W5Ty5ayu |
+| m/44'/0'/0'/0/0 | 14QEoz5SwQ5Kfjkhs5QitskgfD5QCqM7RB | L4X3nAcMs63daNUaWoVL6YBRh7GDsyT3mouEKLFhSeYe5PBwJbXe | 024977580921d65487194d2d84744b411cdbc19ec374bdb3fdfcf32e86e3e16830 | xprvA3rUF5RAJPotmYWqWmqEoWweV6CWVwYMA6vSGb6VCjhGFKaPuxHnveqBaBs19GPhp8unUjNBUj2TEFgbUUqsaPzF41w1SHcFUMC9jb8KCcJ |
+| m/44'/0'/0'/0/1 | 1B83aj2N1Dxx37C4UdNM4vE5JxVKQV1Hur | L3Ks5PyY6enhjxsevfPYfsDmCtaK6nUymPmaN1Xvszh86urom9nw | 0357e9b058d9cbaece6459537579a6b7a9822f163844cd50f94ab76ad3781f2d4d | xprvA3rUF5RAJPotoshfn98F5SpcbC2vbR2CKtKkFfr8LJ7FwmukaCCN1fbcqqefb51odUrkFxnxxTyBkUM2hQ3ymusqjtEr3CErczzT1UkhERP |
++-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
+
+note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+
+
+## Derive addresses from bip39 mnemonic seed words. (with password)
+
+```
+$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" --mnemonic-pw="mypass" --path="m/44'/0'/0'/0"  -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
+
++-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| path            | address                            | privkey                                              | pubkey                                                             | xprv                                                                                                            |
++-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| m               | 1GmHqykYzYHz6G3FiC9t8JRjEGXmDqmnKA | L5D4PLY9ESVfF3pJnzp4vMz9DXfTstyWq29tdcFyGcziz1vDZZrU | 021d0ba761acb490283a75f523c38e572dd96a3b0ed9a34c110f40dab8aa82b766 | xprv9s21ZrQH143K4NLDtVeqgtfoxAPoRuPLipm1EzQRhP8Vp3sx5nYu8KTFutKfv3MRrGBJgcRxg9gcQwe2tBaLUov8tm18zaE2LxbwkW4j2SA |
+| m/44'/0'/0'/0/0 | 1MXGCNMujDdT8AbXH7bxUEemiG8zQUk7ag | Kx3sazEL38AyeiNqz2vnW6btfCTcdn2Ww1ubxyX3yCEkiZvppp5d | 02dd4630b4ded7635093afc6bb498f498b9ce5f735d10a80ad0d0f67f23a005f79 | xprvA2XuGNexMcwzPEmVVXnwcTuax4sz4nehv6eSrqnAZ2AWjXFBYuvtge55L3ytZcdTp5S3ptwhaJbtEZ35wvib3S9cQPemQEHm6W8FNWLHH59 |
+| m/44'/0'/0'/0/1 | 1EMfWdxRQYzg78PGcHq6pEDqZbQMDm31JN | L3y1MsuW6bbWsR6jkaDXcsHRocBMPHoMcnr7zz7xviHrEg1na4fU | 03597bafe11885102e45542060b8f7dec902d994fdb7b04c4b0f1f97e3db94ea64 | xprvA2XuGNexMcwzTwbLgXNrHEoYArDaV9zz17yDD1RkWsbn48g2MPJoRhoNXaZbxBqeQ64HGKkJ4hmzrgc4jFW6C9ku9L46hfbBPUguE2dRVZo |
++-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+```
+
+note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
 
 
 
@@ -84,21 +103,21 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 Addresses can also be derived for a public (xpub) key.  In this case, result fields pertaining to private keys will be empty.
 
 ```
-$ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --numderive=3
+$ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --numderive=3
 
-+------+---------+------------------------------------+
-| path | privkey | address                            |
-+------+---------+------------------------------------+
-| m/0  |         | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge |
-| m/1  |         | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi |
-| m/2  |         | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr |
-+------+---------+------------------------------------+
++------+------------------------------------+---------+
+| path | address                            | privkey |
++------+------------------------------------+---------+
+| m/0  | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge |         |
+| m/1  | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi |         |
+| m/2  | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr |         |
++------+------------------------------------+---------+
 ```
 
 
 ## We can easily change up the columns in whatever order we want.
 
-Just the --cols parameter.
+Just use the --cols parameter.
 
 ```
 $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --numderive=3 --cols=xpub,address
