@@ -32,7 +32,10 @@ function main( $argv ) {
         }
 
         $worker = new wallet_derive( $params );
-        $addrs = $worker->derive_keys();
+
+        $key = @$params['key'] ?: $worker->mnemonicToKey( $params['mnemonic'], $params['mnemonic-pw'] );
+        $addrs = $worker->derive_keys($key);
+        
         echo "\n";
         walletderivereport::print_results($params, $addrs);
         return 0;
@@ -52,6 +55,8 @@ function main( $argv ) {
  */
 function get_cli_params() {
     $params = getopt( 'g', array( 'key:',
+                                  'mnemonic:',
+                                  'mnemonic-pw:',
                                   'outfile:',
                                   'numderive:',
                                   'includeroot',
@@ -89,10 +94,12 @@ function process_cli_params( $params ) {
     mylogger()->set_log_level_by_name( $loglevel );
 
     $key = @$params['key'];
+    $mnemonic = @$params['mnemonic'];
     
-    if( !$key ) {
-        throw new Exception( "--key must be specified." );
+    if( !$key && !$mnemonic ) {
+        throw new Exception( "--key or --mnemonic must be specified." );
     }
+    $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
     
     if( @$params['path'] && !is_numeric($params['path']) && $params['path']{0} != 'm' ) {
         throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
@@ -138,7 +145,11 @@ function print_help() {
 
     -g                   go!  ( required )
     
-    --key=<csv>          xpriv or xpub key
+    --key=<key>          xpriv or xpub key
+    --mnemonic=<words>   bip39 seed words
+                           note: either key or nmemonic is required.
+                           
+    --mnemonic-pw=<pw>   optionally specify password for mnemonic.
                             
     --cols=<cols>        a csv list of columns, or "all"
                          all:

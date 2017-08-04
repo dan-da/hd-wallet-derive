@@ -8,8 +8,9 @@ use \BitWasp\Bitcoin\Address;
 use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
 use \BitWasp\Buffertools\Buffer;
 
-// For Copay Multisig stuff.
+// For Bip39 Mnemonics
 use \BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
+use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 
 // For generating plaintext tables.
 require_once __DIR__ . '/mysqlutil.class.php';
@@ -36,14 +37,13 @@ class wallet_derive {
 
     /* Derives child keys/addresses for a given key.
      */
-    public function derive_keys() {
+    public function derive_keys($key) {
 
         $params = $this->get_params();
         $addrs = array();
         
         $math = Bitcoin::getMath();
         $network = Bitcoin::getNetwork();
-        $key = $params['key'];
 
         $master = HierarchicalKeyFactory::fromExtended($key, $network);
         
@@ -94,6 +94,22 @@ class wallet_derive {
         }
 
         return $addrs;
+    }
+
+    // converts a bip39 mnemonic string with optional password to an xprv key (string).
+    static public function mnemonicToKey($mnemonic, $password=null) {
+        $bip39 = MnemonicFactory::bip39();
+        $seedGenerator = new Bip39SeedGenerator($bip39);
+
+        // Derive a seed from mnemonic/password
+        $seed = $seedGenerator->getSeed($mnemonic, $password);
+        
+        // not logging seed.  just in case somebody keeps logs in insecure location.
+        // mylogger()->log( "Seed: " . $seed->getHex(), mylogger::info );
+        // echo $seed->getHex() . "\n";
+        
+        $bip32 = \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory::fromEntropy($seed);
+        return $bip32->toExtendedKey();
     }
 
     /* Returns all columns available for reports

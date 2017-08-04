@@ -4,6 +4,9 @@ A command-line tool that derives bip32 addresses and private keys.
 
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
+Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
+optional password.
+
 This tool can be used in place of your wallet software if it is misbehaving or
 if you just want to see more information about your wallet addresses, including
 private keys and addresses you haven't even used yet.
@@ -59,6 +62,22 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 | m/1/2 | xprv9yJyMFmJjNAibyUzvGgfpk8igy6DpCtjWQ6C5oVmXyUhqak5J2xj6K2y7o3qn22nAvt14cLjRQEXVpGRZoc3ULJHomWmkUTTPJCEaF4rZPr | xpub6CJKkmJCZjj1pTZU2JDgBt5TEzviDfcasd1ntBuP6K1giP5DqaGye7MSy5MYFWoGtVhvK8Ko2XW4JRMtKjMXctpPxcjRMjM47AqeWiZLKKN | L1AFnZ6JJyGRxLG9QoCTDzeLzLV617XtgLy8DrXCyLnPG6L1n7xo | 17XRz7oPJLUNp5uf66BeqTmSDuRwqz3aW4 |     2 |
 +-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
 ```
+
+## Derive addresses from bip39 mnemonic seed words.
+
+```
+$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask blah adfadsfadsfadsfadsfadsf"  -g --includeroot  --numderive=2 --cols=all
+
++------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
+| path | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | address                            | index |
++------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
+| m    | xprv9s21ZrQH143K4CTyEk32W1CTegxHiBhPymLeqhqiuwcC1nRHRJKVi1ALq7fa7eeqkBEv6SNbfMqKv8Pxecr3eCG4W32NYeAC1gEc6GTaJ8c | xpub661MyMwAqRbcGgYSLma2s99CCinn7eRFLzGFe6FLUH9AtakRxqdkFoUpgQezcBfw1mv7Qpk5w855BLA227mYfLj17BCmGuR57PSspgtKebV | KxMvKHv6fyNWZyi5nnURRXHoxBHr5ij2N68RmKwmjgi4Wj2y9HqL | 1GdfFaJALCAMjbXD5g8h2cvayvnjCUUge5 |       |
+| m/0  | xprv9vAFEsVvB5BRU8FL81ims4W2AghDqAvo98FfcHRVtVqHAFjx96jLmaDLCokzZYs8fFajSW7ToEbx8SjDG9qMJyyNNDojXrQytVXvKq6ByMG | xpub699beP2p1SjigcKoE3FnECSkiiXiEdeeWMBGQfq7SqNG3456ge3bKNXp449ZeZ3ZsGPwtV8mx5SLgatv4jtZEJWPhsfa2aEotrDeeHdrcXw | L3FEHQEiq1jF7mnS3v8pDZw2wTKE22DQ9f9UhphJMepJv5XkjiLE | 148CyDkNig2KX8JBEp7Q7osof94yX35ZMw |     0 |
+| m/1  | xprv9vAFEsVvB5BRWCtf8Dco1t99zSyoVBn3JPHd2BW9qXxvrKEwNrKCctUsSun1vT4RQddGnnRMMCTG9DQQsM6oczv4GumRBbQwNnTZ4ctsPYu | xpub699beP2p1Sjiigy8EF9oP25tYUpHteVtfcDDpZumPsVuj7a5vPdTAgoMJEWyhFCpdsH1MhCnqEMYAsmxnNTWRLw46nax64k75pcSwc5yKUQ | KwchLem2rn58g9zRDPamsuP35t4YYySaixtC9niBidAM8RP5VCJc | 1LYP3U4SSU4qmp8GgShhoqNSzyktvx9rMw |     1 |
++------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
+```
+
+
 
 ## Derive addresses from xpub key
 
@@ -201,8 +220,6 @@ The report may be printed in the following formats:
 # Usage
 
 ```
-$ ./hd-wallet-derive.php --help
-
    hd-wallet-derive.php
 
    This script derives private keys and public addresses
@@ -211,13 +228,17 @@ $ ./hd-wallet-derive.php --help
 
     -g                   go!  ( required )
     
-    --key=<csv>          xpriv or xpub key
+    --key=<key>          xpriv or xpub key
+    --mnemonic=<words>   bip39 seed words
+                           note: either key or nmemonic is required.
+                           
+    --mnemonic-pw=<pw>   optionally specify password for mnemonic.
                             
     --cols=<cols>        a csv list of columns, or "all"
                          all:
-                          (relpath,xprv,xpub,privkey,address,index)
+                          (path,xprv,xpub,privkey,address,index)
                          default:
-                          (relpath,privkey,address)
+                          (path,privkey,address)
 
     --outfile=<path>     specify output file path.
     --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
@@ -227,7 +248,7 @@ $ ./hd-wallet-derive.php --help
                          only works when outfile is specified.
                          
                          'list' prints only the first column. see --cols
-
+                         
     --path=<path>        bip32 path to derive, relative to provided key (m).
                            eg "", "m/0" or "m/1"
                            default = "m"
