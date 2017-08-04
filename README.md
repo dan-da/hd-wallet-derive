@@ -30,6 +30,7 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 | m/1  | L1xYoR7VS6vuvkmfRM4ubaH84vRkWKUS2PmYj9DPTS76NQ4NtZP9 | 192oE3o29AAoBPQiTYe65kRU2zoBLpEnUm |
 | m/2  | L21sVq8wutBSQWTzVJVBTeCdkfTgw41dK3PPViZ3Ds2xnMq8RMbK | 1BbtRW5sua3Ewhm8jHAURUiz9t4bw8TQo9 |
 +------+------------------------------------------------------+------------------------------------+```
+```
 
 ## Deriving change addresses and showing all columns.
 
@@ -57,7 +58,7 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 | m/1/1 | xprv9yJyMFmJjNAiZ2NDkwj7Jcjo8AtdJTPYXF5bBLGUYh8NNid9bgAfuhNtSEco35mLrBzPPRTaA5XeezrtPxn59MsYBzjRZt6XqGW2T87JiS4 | xpub6CJKkmJCZjj1mWSgryG7fkgXgCj7hv7PtU1Byig672fMFWxJ9DUvTVhNHVA8ciGkqrwaqDW6Mvmr4ihT3EoqjgNK6s5P6C9X7UBLX5Trzw6 | KyxHznKrz1Y6jmE5fxnHh1e2AZLNCtDjnF86cZzk8F5S8nBxfqfc | 1N3vKW2KGeKocao9eae6kVyYL8GNLzW8yd |     1 |
 | m/1/2 | xprv9yJyMFmJjNAibyUzvGgfpk8igy6DpCtjWQ6C5oVmXyUhqak5J2xj6K2y7o3qn22nAvt14cLjRQEXVpGRZoc3ULJHomWmkUTTPJCEaF4rZPr | xpub6CJKkmJCZjj1pTZU2JDgBt5TEzviDfcasd1ntBuP6K1giP5DqaGye7MSy5MYFWoGtVhvK8Ko2XW4JRMtKjMXctpPxcjRMjM47AqeWiZLKKN | L1AFnZ6JJyGRxLG9QoCTDzeLzLV617XtgLy8DrXCyLnPG6L1n7xo | 17XRz7oPJLUNp5uf66BeqTmSDuRwqz3aW4 |     2 |
 +-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
--``
+```
 
 ## Derive addresses from xpub key
 
