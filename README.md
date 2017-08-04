@@ -23,15 +23,13 @@ this key.
 ```
 $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --numderive=3
 
-+---------+------------------------------------------------------+------------------------------------+
-| relpath | privkey                                              | address                            |
-+---------+------------------------------------------------------+------------------------------------+
-|       0 | L4mgN3QEzR9PT6zPeKXGk3xNiGxxkHu4575W9YwBSRV2sRiyjV4g | 1A9X6wjnER55GMpCCsTjn973y56u3zviDe |
-|       1 | L1xYoR7VS6vuvkmfRM4ubaH84vRkWKUS2PmYj9DPTS76NQ4NtZP9 | 192oE3o29AAoBPQiTYe65kRU2zoBLpEnUm |
-|       2 | L21sVq8wutBSQWTzVJVBTeCdkfTgw41dK3PPViZ3Ds2xnMq8RMbK | 1BbtRW5sua3Ewhm8jHAURUiz9t4bw8TQo9 |
-+---------+------------------------------------------------------+------------------------------------+
-
-```
++------+------------------------------------------------------+------------------------------------+
+| path | privkey                                              | address                            |
++------+------------------------------------------------------+------------------------------------+
+| m/0  | L4mgN3QEzR9PT6zPeKXGk3xNiGxxkHu4575W9YwBSRV2sRiyjV4g | 1A9X6wjnER55GMpCCsTjn973y56u3zviDe |
+| m/1  | L1xYoR7VS6vuvkmfRM4ubaH84vRkWKUS2PmYj9DPTS76NQ4NtZP9 | 192oE3o29AAoBPQiTYe65kRU2zoBLpEnUm |
+| m/2  | L21sVq8wutBSQWTzVJVBTeCdkfTgw41dK3PPViZ3Ds2xnMq8RMbK | 1BbtRW5sua3Ewhm8jHAURUiz9t4bw8TQo9 |
++------+------------------------------------------------------+------------------------------------+```
 
 ## Deriving change addresses and showing all columns.
 
@@ -49,32 +47,32 @@ relpath. This row is included because of the --includeroot flag. In this way, we
 can easily obtain the xpub key for our xprv key.
 
 ```
-$ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --path=1 --cols=all --includeroot --numderive=3
+$ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --path=m/1 --cols=all --includeroot --numderive=3
 
-+---------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-| relpath | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | address                            | index |
-+---------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-| /       | xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c | xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9 | L1pbvV86crAGoDzqmgY85xURkz3c435Z9nirMt52UbnGjYMzKBUN | 1CHCnCjgMNb6digimckNQ6TBVcTWBAmPHK |       |
-| 1/0     | xprv9yJyMFmJjNAiXqf3yfT6NvWCkXo1PTdYw6x5sj6fH2ePRVL4N4wy8weFYJnMKxNEib9HFyS7pc69rE3tmw7FfWhshBc17wHcKsNHByt4SZC | xpub6CJKkmJCZjj1kKjX5gz6k4SwJZdVnvMQJKsgg7WGqNBNJHfCucGDgjxjPcHY9QZJCne3tubbtucYmpt7a7u1Xx3oNumZRVytpa2UdFjTr47 | KxcccHPiLz7sxUVShX9THgfH6i8D6m3iAkHtgGuB87Tm3maz8Jas | 1qhp7SiuVmxo3WKca7zHMkKjvjkGXs29d  |     0 |
-| 1/1     | xprv9yJyMFmJjNAiZ2NDkwj7Jcjo8AtdJTPYXF5bBLGUYh8NNid9bgAfuhNtSEco35mLrBzPPRTaA5XeezrtPxn59MsYBzjRZt6XqGW2T87JiS4 | xpub6CJKkmJCZjj1mWSgryG7fkgXgCj7hv7PtU1Byig672fMFWxJ9DUvTVhNHVA8ciGkqrwaqDW6Mvmr4ihT3EoqjgNK6s5P6C9X7UBLX5Trzw6 | KyxHznKrz1Y6jmE5fxnHh1e2AZLNCtDjnF86cZzk8F5S8nBxfqfc | 1N3vKW2KGeKocao9eae6kVyYL8GNLzW8yd |     1 |
-| 1/2     | xprv9yJyMFmJjNAibyUzvGgfpk8igy6DpCtjWQ6C5oVmXyUhqak5J2xj6K2y7o3qn22nAvt14cLjRQEXVpGRZoc3ULJHomWmkUTTPJCEaF4rZPr | xpub6CJKkmJCZjj1pTZU2JDgBt5TEzviDfcasd1ntBuP6K1giP5DqaGye7MSy5MYFWoGtVhvK8Ko2XW4JRMtKjMXctpPxcjRMjM47AqeWiZLKKN | L1AFnZ6JJyGRxLG9QoCTDzeLzLV617XtgLy8DrXCyLnPG6L1n7xo | 17XRz7oPJLUNp5uf66BeqTmSDuRwqz3aW4 |     2 |
-+---------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
-```
++-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
+| path  | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | address                            | index |
++-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
+| m     | xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c | xpub67xpozcx8pe95XVuZLHXZeG6XWXHpGq6Qv5cmNfi7cS5mtjJ2tgypeQbBs2UAR6KECeeMVKZBPLrtJunSDMstweyLXhRgPxdp14sk9tJPW9 | L1pbvV86crAGoDzqmgY85xURkz3c435Z9nirMt52UbnGjYMzKBUN | 1CHCnCjgMNb6digimckNQ6TBVcTWBAmPHK |       |
+| m/1/0 | xprv9yJyMFmJjNAiXqf3yfT6NvWCkXo1PTdYw6x5sj6fH2ePRVL4N4wy8weFYJnMKxNEib9HFyS7pc69rE3tmw7FfWhshBc17wHcKsNHByt4SZC | xpub6CJKkmJCZjj1kKjX5gz6k4SwJZdVnvMQJKsgg7WGqNBNJHfCucGDgjxjPcHY9QZJCne3tubbtucYmpt7a7u1Xx3oNumZRVytpa2UdFjTr47 | KxcccHPiLz7sxUVShX9THgfH6i8D6m3iAkHtgGuB87Tm3maz8Jas | 1qhp7SiuVmxo3WKca7zHMkKjvjkGXs29d  |     0 |
+| m/1/1 | xprv9yJyMFmJjNAiZ2NDkwj7Jcjo8AtdJTPYXF5bBLGUYh8NNid9bgAfuhNtSEco35mLrBzPPRTaA5XeezrtPxn59MsYBzjRZt6XqGW2T87JiS4 | xpub6CJKkmJCZjj1mWSgryG7fkgXgCj7hv7PtU1Byig672fMFWxJ9DUvTVhNHVA8ciGkqrwaqDW6Mvmr4ihT3EoqjgNK6s5P6C9X7UBLX5Trzw6 | KyxHznKrz1Y6jmE5fxnHh1e2AZLNCtDjnF86cZzk8F5S8nBxfqfc | 1N3vKW2KGeKocao9eae6kVyYL8GNLzW8yd |     1 |
+| m/1/2 | xprv9yJyMFmJjNAibyUzvGgfpk8igy6DpCtjWQ6C5oVmXyUhqak5J2xj6K2y7o3qn22nAvt14cLjRQEXVpGRZoc3ULJHomWmkUTTPJCEaF4rZPr | xpub6CJKkmJCZjj1pTZU2JDgBt5TEzviDfcasd1ntBuP6K1giP5DqaGye7MSy5MYFWoGtVhvK8Ko2XW4JRMtKjMXctpPxcjRMjM47AqeWiZLKKN | L1AFnZ6JJyGRxLG9QoCTDzeLzLV617XtgLy8DrXCyLnPG6L1n7xo | 17XRz7oPJLUNp5uf66BeqTmSDuRwqz3aW4 |     2 |
++-------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+------------------------------------+-------+
+-``
 
 ## Derive addresses from xpub key
 
 Addresses can also be derived for a public (xpub) key.  In this case, result fields pertaining to private keys will be empty.
 
 ```
-$ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR
+$ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --numderive=3
 
-+---------+---------+------------------------------------+
-| relpath | privkey | address                            |
-+---------+---------+------------------------------------+
-|       0 |         | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge |
-|       1 |         | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi |
-|       2 |         | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr |
-+---------+---------+------------------------------------+
++------+---------+------------------------------------+
+| path | privkey | address                            |
++------+---------+------------------------------------+
+| m/0  |         | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge |
+| m/1  |         | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi |
+| m/2  |         | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr |
++------+---------+------------------------------------+
 ```
 
 
@@ -228,10 +226,10 @@ $ ./hd-wallet-derive.php --help
                          only works when outfile is specified.
                          
                          'list' prints only the first column. see --cols
-                         
-    --path=<path>        bip32 path to derive, relative to provided key.
-                           eg "", "/0" or "/1"
-                           default = ""
+
+    --path=<path>        bip32 path to derive, relative to provided key (m).
+                           eg "", "m/0" or "m/1"
+                           default = "m"
                            
     --includeroot       include root key as first element of report.
     

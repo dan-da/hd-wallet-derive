@@ -33,6 +33,7 @@ function main( $argv ) {
 
         $worker = new wallet_derive( $params );
         $addrs = $worker->derive_keys();
+        echo "\n";
         walletderivereport::print_results($params, $addrs);
         return 0;
     }
@@ -84,7 +85,7 @@ function process_cli_params( $params ) {
         mylogger()->echo_log = false;
     }
 
-    $loglevel = @$params['loglevel'] ?: 'info';
+    $loglevel = @$params['loglevel'] ?: 'specialinfo';
     mylogger()->set_log_level_by_name( $loglevel );
 
     $key = @$params['key'];
@@ -92,9 +93,13 @@ function process_cli_params( $params ) {
     if( !$key ) {
         throw new Exception( "--key must be specified." );
     }
-
+    
+    if( @$params['path'] && !is_numeric($params['path']) && $params['path']{0} != 'm' ) {
+        throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
+    }
+    
     $params['cols'] = get_cols( $params );
-    $params['path'] = @$params['path'];
+    $params['path'] = @$params['path'] ?: 'm';
     
     $params['format'] = @$params['format'] ?: 'txt';
     $params['cols'] = @$params['cols'] ?: 'all';
@@ -150,9 +155,9 @@ function print_help() {
                          
                          'list' prints only the first column. see --cols
                          
-    --path=<path>        bip32 path to derive, relative to provided key.
-                           eg "", "/0" or "/1"
-                           default = ""
+    --path=<path>        bip32 path to derive, relative to provided key (m).
+                           eg "", "m/0" or "m/1"
+                           default = "m"
                            
     --includeroot       include root key as first element of report.
     

@@ -62,16 +62,17 @@ class wallet_derive {
                               'xpub' => $xpub,
                               'address' => $address,
                               'index' => null,
-                              'relpath' => '/');
+                              'path' => 'm');
         }
 
         mylogger()->log( "Generating addresses", mylogger::info );
+        $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
         for( $i = $start; $i < $end; $i ++ ) {
-            if( $i && $i % 5 == 0 ) {
-                mylogger()->log( "Generated $i keys", mylogger::info );
+            if( $i && $i % 10 == 0 ) {
+                mylogger()->log( "Generated $i keys", mylogger::specialinfo );
             }
-            $relpath = strlen($params['path']) ? $params['path'] . "/$i" : "$i";
-            $key = $master->derivePath($relpath);
+            $path = $path_base . "/$i";
+            $key = $master->derivePath($path);
             
             // fixme: hack for copay/multisig.  maybe should use a callback?
             if(method_exists($key, 'getPublicKey')) {
@@ -89,7 +90,7 @@ class wallet_derive {
                               'xpub' => $xpub,
                               'address' => $address,
                               'index' => $i,
-                              'relpath' => $relpath);
+                              'path' => $path);
         }
 
         return $addrs;
@@ -98,13 +99,13 @@ class wallet_derive {
     /* Returns all columns available for reports
      */
     static public function all_cols() {
-        return ['relpath', 'xprv', 'xpub', 'privkey', 'address', 'index'];
+        return ['path', 'xprv', 'xpub', 'privkey', 'address', 'index'];
     }
 
     /* Returns default reporting columns
      */
     static public function default_cols() {
-        return ['relpath', 'privkey', 'address'];
+        return ['path', 'privkey', 'address'];
     }
 }
 
