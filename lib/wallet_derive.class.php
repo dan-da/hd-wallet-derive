@@ -12,11 +12,12 @@ use \BitWasp\Buffertools\Buffer;
 use \BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
 use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 
-// For generating plaintext tables.
-require_once __DIR__ . '/mysqlutil.class.php';
-
 // For generating html tables.
 require_once __DIR__ . '/html_table.class.php';
+
+// For logging.
+require_once __DIR__ . '/mylogger.class.php';
+
 
 /* A class that implements HD wallet key/address derivation
  */
@@ -257,7 +258,7 @@ class walletderivereport {
      */
     static protected function write_results_fixed_width( $fh, $results, $summary ) {
 
-        $buf = mysqlutil::format_results_fixed_width( $results );
+        $buf = texttable::table( $results );
         fwrite( $fh, $buf );
         
         fwrite( $fh, "\n" );

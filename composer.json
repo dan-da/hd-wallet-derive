@@ -4,7 +4,9 @@
     "require": {
         "bitwasp/bitcoin": ">=0.0.19",
         "ext-json": "*",
-        "php": ">=5.5"
+        "php": ">=5.5",
+        "dan-da/texttable-php": "^1.0",
+        "dan-da/strictmode-php": "^1.0"
     },
 
     "require-dev": {
