@@ -8,7 +8,8 @@
  */
 
 // Let's be strict about things.
-require_once __DIR__ . '/lib/strict_mode.funcs.php';
+require_once __DIR__ . '/vendor/autoload.php';
+\strictmode\initializer::init();
 
 // This guy does the heavy lifting.
 require_once __DIR__ . '/lib/wallet_derive.class.php';
