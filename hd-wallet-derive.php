@@ -151,6 +151,8 @@ function print_help() {
                            note: either key or nmemonic is required.
                            
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
+
+    --numderive=<n>      Number of keys to derive.  default=10
                             
     --cols=<cols>        a csv list of columns, or "all"
                          all:
