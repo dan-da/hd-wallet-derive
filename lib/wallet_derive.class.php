@@ -48,9 +48,8 @@ class wallet_derive {
 
         $master = HierarchicalKeyFactory::fromExtended($key, $network);
         
-        
-        $start = 0;
-        $end = $params['numderive'];
+        $start = $params['startindex'];
+        $end = $params['startindex'] + $params['numderive'];
         
         if( $params['includeroot'] ) {
             $address = $master->getPublicKey()->getAddress()->getAddress();
