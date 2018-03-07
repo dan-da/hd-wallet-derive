@@ -107,8 +107,10 @@ function process_cli_params( $params ) {
     }
     
     $params['cols'] = get_cols( $params );
-    $params['path'] = @$params['path'] ?: 'm';
-    
+    if ( !isset( $params['path'] )){
+      $params['path'] = 'm';
+    } 
+  
     $params['format'] = @$params['format'] ?: 'txt';
     $params['cols'] = @$params['cols'] ?: 'all';
     $params['numderive'] = @$params['numderive'] ?: 10;
