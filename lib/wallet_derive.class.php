@@ -18,6 +18,9 @@ require_once __DIR__ . '/html_table.class.php';
 // For logging.
 require_once __DIR__ . '/mylogger.class.php';
 
+// Bcash Bech32 Converter.
+require_once __DIR__ . '/bitcoincash_bech32_class.php';
+
 
 /* A class that implements HD wallet key/address derivation
  */
@@ -53,6 +56,7 @@ class wallet_derive {
         
         if( $params['includeroot'] ) {
             $address = $master->getPublicKey()->getAddress()->getAddress();
+            $bcashaddress = \CashAddress\CashAddress::old2new($address);
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
             $pubkey = $master->getPublicKey()->getHex();
@@ -65,6 +69,7 @@ class wallet_derive {
                               'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
+                              'bitcoincash' => $bcashaddress,
                               'index' => null,
                               'path' => 'm');
         }
@@ -82,6 +87,7 @@ class wallet_derive {
             if(method_exists($key, 'getPublicKey')) {
                 // bip32 path
                 $address = $key->getPublicKey()->getAddress()->getAddress();
+                $bcashaddress = \CashAddress\CashAddress::old2new($address);
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
                 $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
                 $pubkey = $key->getPublicKey()->getHex();
@@ -97,6 +103,7 @@ class wallet_derive {
                               'pubkeyhash' => $pubkeyhash,
                               'xpub' => $xpub,
                               'address' => $address,
+                              'bitcoincash' => $bcashaddress,
                               'index' => $i,
                               'path' => $path);
         }
@@ -123,7 +130,7 @@ class wallet_derive {
     /* Returns all columns available for reports
      */
     static public function all_cols() {
-        return ['path', 'address', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
+        return ['path', 'address', 'bitcoincash', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
     }
 
     /* Returns default reporting columns
