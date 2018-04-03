@@ -4,9 +4,10 @@ require_once __DIR__  . '/../vendor/autoload.php';
 
 // For HD-Wallet Key Derivation
 use \BitWasp\Bitcoin\Bitcoin;
-use \BitWasp\Bitcoin\Address;
 use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
-use \BitWasp\Buffertools\Buffer;
+use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
+use BitWasp\Bitcoin\Network\Networks\Litecoin;
+use BitWasp\Bitcoin\Bech32;
 
 // For Bip39 Mnemonics
 use \BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
@@ -44,24 +45,45 @@ class wallet_derive {
     public function derive_keys($key) {
 
         $params = $this->get_params();
+
+        $coin = $params['coin'];
+
         $addrs = array();
-        
-        $math = Bitcoin::getMath();
+
+        switch($coin)
+        {
+            case 'ltc':
+
+                Bitcoin::setNetwork(new Litecoin());
+
+                break;
+
+            default:
+                break;
+        }
+
         $network = Bitcoin::getNetwork();
 
         $master = HierarchicalKeyFactory::fromExtended($key, $network);
-        
+
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
-        
+
+        $bcashaddress = '';
+
         if( $params['includeroot'] ) {
-            $address = $master->getPublicKey()->getAddress()->getAddress();
-            $bcashaddress = \CashAddress\CashAddress::old2new($address);
+            $ptpkha = new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash());
+            $address = $ptpkha->getAddress();
+            if($coin == 'bcc')
+            {
+                $bcashaddress = \CashAddress\CashAddress::old2new($address);
+            }
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
             $pubkey = $master->getPublicKey()->getHex();
             $pubkeyhash = $master->getPublicKey()->getPubKeyHash()->getHex();
             $xpub = $master->toExtendedPublicKey($network);
+
 
             $addrs[] = array( 'xprv' => $xprv,
                               'privkey' => $wif,
@@ -69,10 +91,23 @@ class wallet_derive {
                               'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
-                              'bitcoincash' => $bcashaddress,
                               'index' => null,
                               'path' => 'm');
+
+            if($coin == 'bcc')
+            {
+                $addrs[] = array( 'xprv' => $xprv,
+                    'privkey' => $wif,
+                    'pubkey' => $pubkey,
+                    'pubkeyhash' => $pubkey,
+                    'xpub' => $xpub,
+                    'address' => $bcashaddress,
+                    'index' => null,
+                    'path' => 'm');
+
+            }
         }
+
 
         mylogger()->log( "Generating addresses", mylogger::info );
         $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
@@ -86,8 +121,15 @@ class wallet_derive {
             // fixme: hack for copay/multisig.  maybe should use a callback?
             if(method_exists($key, 'getPublicKey')) {
                 // bip32 path
-                $address = $key->getPublicKey()->getAddress()->getAddress();
-                $bcashaddress = \CashAddress\CashAddress::old2new($address);
+                $ptpkha = new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash());
+
+                $address = $ptpkha->getAddress();
+
+                if($coin == 'bcc')
+                {
+                    $bcashaddress = \CashAddress\CashAddress::old2new($address);
+                }
+
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
                 $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
                 $pubkey = $key->getPublicKey()->getHex();
@@ -97,15 +139,28 @@ class wallet_derive {
             else {
                 throw new Exception("multisig keys not supported");
             }
+
             $addrs[] = array( 'xprv' => $xprv,
-                              'privkey' => $priv_wif,
-                              'pubkey' => $pubkey,
-                              'pubkeyhash' => $pubkeyhash,
-                              'xpub' => $xpub,
-                              'address' => $address,
-                              'bitcoincash' => $bcashaddress,
-                              'index' => $i,
-                              'path' => $path);
+                'privkey' => $priv_wif,
+                'pubkey' => $pubkey,
+                'pubkeyhash' => $pubkeyhash,
+                'xpub' => $xpub,
+                'address' => $address,
+                'index' => $i,
+                'path' => $path);
+
+            if($coin == 'bcc')
+            {
+                $addrs[] = array( 'xprv' => $xprv,
+                    'privkey' => $priv_wif,
+                    'pubkey' => $pubkey,
+                    'pubkeyhash' => $pubkeyhash,
+                    'xpub' => $xpub,
+                    'address' => $bcashaddress,
+                    'index' => $i,
+                    'path' => $path);
+
+            }
         }
 
         return $addrs;
@@ -155,6 +210,7 @@ class walletderivereport {
         
         // remove columns not in report and change column order.
         $report_cols = $params['cols'];
+
         foreach( $results as &$r ) {
             $tmp = $r;
             $r = [];

@@ -56,6 +56,7 @@ function main( $argv ) {
  */
 function get_cli_params() {
     $params = getopt( 'g', array( 'key:',
+                                  'coin:',
                                   'mnemonic:',
                                   'mnemonic-pw:',
                                   'outfile:',
@@ -82,6 +83,11 @@ function process_cli_params( $params ) {
         return [$params, 2];
     }
     if( isset( $params['help']) || !isset($params['g']) ) {
+        print_help();
+        return [$params, 1];
+    }
+
+    if( !isset($params['coin']) ) {
         print_help();
         return [$params, 1];
     }
@@ -148,6 +154,8 @@ function print_help() {
    Options:
 
     -g                   go!  ( required )
+    
+    --coin=<coin>        Coin (btc, ltc, bcc) ( required )
     
     --key=<key>          xpriv or xpub key
     --mnemonic=<words>   bip39 seed words
