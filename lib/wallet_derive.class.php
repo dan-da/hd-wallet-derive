@@ -91,6 +91,7 @@ class wallet_derive {
                               'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
+                              'bitcoincash' => '',
                               'index' => null,
                               'path' => 'm');
 
@@ -101,7 +102,8 @@ class wallet_derive {
                     'pubkey' => $pubkey,
                     'pubkeyhash' => $pubkey,
                     'xpub' => $xpub,
-                    'address' => $bcashaddress,
+                    'address' => $address,
+                    'bitcoincash' => $bcashaddress,
                     'index' => null,
                     'path' => 'm');
 
@@ -146,6 +148,7 @@ class wallet_derive {
                 'pubkeyhash' => $pubkeyhash,
                 'xpub' => $xpub,
                 'address' => $address,
+                'bitcoincash' => '',
                 'index' => $i,
                 'path' => $path);
 
@@ -156,7 +159,8 @@ class wallet_derive {
                     'pubkey' => $pubkey,
                     'pubkeyhash' => $pubkeyhash,
                     'xpub' => $xpub,
-                    'address' => $bcashaddress,
+                    'address' => $address,
+                    'bitcoincash' => $bcashaddress,
                     'index' => $i,
                     'path' => $path);
 
