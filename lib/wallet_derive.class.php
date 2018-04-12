@@ -7,7 +7,7 @@ use \BitWasp\Bitcoin\Bitcoin;
 use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 use BitWasp\Bitcoin\Network\Networks\Litecoin;
-use BitWasp\Bitcoin\Bech32;
+use BitWasp\Bitcoin\Network\Networks\Zcash;
 
 // For Bip39 Mnemonics
 use \BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
@@ -55,6 +55,12 @@ class wallet_derive {
             case 'ltc':
 
                 Bitcoin::setNetwork(new Litecoin());
+
+                break;
+
+            case 'zec':
+
+                Bitcoin::setNetwork(new Zcash());
 
                 break;
 
