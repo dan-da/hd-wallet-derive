@@ -4,7 +4,8 @@ require_once __DIR__  . '/../vendor/autoload.php';
 
 // For HD-Wallet Key Derivation
 use \BitWasp\Bitcoin\Bitcoin;
-use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
+//use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 use BitWasp\Bitcoin\Network\Networks\Litecoin;
 use BitWasp\Bitcoin\Network\Networks\Zcash;
@@ -70,7 +71,10 @@ class wallet_derive {
 
         $network = Bitcoin::getNetwork();
 
-        $master = HierarchicalKeyFactory::fromExtended($key, $network);
+
+        $HKF = new HierarchicalKeyFactory();
+
+        $master = $HKF->fromExtended($key, $network);
 
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
