@@ -1,11 +1,13 @@
 <?php
 
-require_once( dirname(__FILE__) . '/mylogger.class.php' );
+namespace App;
+
+require_once( dirname(__FILE__) . '/MyLogger.php' );
 
 /***
  * A mysql utility class for seorev scripts.
  */
-class mysqlutil {
+class MysqlUtil {
 
     /***
      * Get PDO connection to seorev_stats DB

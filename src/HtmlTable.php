@@ -1,6 +1,8 @@
 <?php
 
-class html_table {
+namespace App;
+
+class HtmlTable {
     
     public $right_align_numeric = true;
     

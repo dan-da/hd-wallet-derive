@@ -1,22 +1,17 @@
 <?php
 
+namespace App;
+
 /***
  * A helper function to access single instance of logger class from anywhere.
  * usage: mylogger()->log( "log message", mymylogger::info );
  */
-function mylogger() {
-    static $l = null;
-    
-    if(!$l) {
-        $l = new mylogger();
-    }
-    return $l;
-}
+
 
 /***
  * A logging class.  Use it!
  */
-class mylogger {
+class MyLogger {
 
     /***
      * log level constants.
@@ -65,6 +60,18 @@ class mylogger {
         // default to highest level of logging.
         $this->log_level = $log_level ?: self::debug;
     }
+
+
+    public static function getInstance()
+    {
+        static $l = null;
+
+        if(!$l) {
+            $l = new mylogger();
+        }
+        return $l;
+    }
+
     
     /***
      * set the log file to write to.

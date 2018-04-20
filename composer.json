@@ -9,6 +9,11 @@
         "dan-da/strictmode-php": "^1.0"
     },
 
-    "require-dev": {
+    "require-dev": {},
+
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
     }
 }

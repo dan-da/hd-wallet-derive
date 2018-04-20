@@ -11,8 +11,10 @@
 require_once __DIR__ . '/vendor/autoload.php';
 \strictmode\initializer::init();
 
-// This guy does the heavy lifting.
-require_once __DIR__ . '/lib/wallet_derive.class.php';
+
+use App\MyLogger;
+use App\WalletDerive;
+use App\WalletDeriveReport;
 
 /**
  * Call main and exit with return code.
@@ -32,17 +34,17 @@ function main( $argv ) {
             return $success;
         }
 
-        $worker = new wallet_derive( $params );
+        $worker = new WalletDerive( $params );
 
         $key = @$params['key'] ?: $worker->mnemonicToKey( $params['mnemonic'], $params['mnemonic-pw'] );
         $addrs = $worker->derive_keys($key);
         
         echo "\n";
-        walletderivereport::print_results($params, $addrs);
+        WalletDeriveReport::print_results($params, $addrs);
         return 0;
     }
     catch( Exception $e ) {
-        mylogger()->log_exception( $e );
+        MyLogger::getInstance()->log_exception( $e );
         
         // print validation errors to stderr.
         if( $e->getCode() == 2 ) {
@@ -98,7 +100,7 @@ function process_cli_params( $params ) {
     }
 
     $loglevel = @$params['loglevel'] ?: 'specialinfo';
-    mylogger()->set_log_level_by_name( $loglevel );
+    MyLogger::getInstance()->set_log_level_by_name( $loglevel );
 
     $key = @$params['key'];
     $mnemonic = @$params['mnemonic'];
@@ -139,9 +141,9 @@ function print_version() {
  */
 function print_help() {
     
-    $levels = mylogger()->get_level_map();
-    $allcols = implode(',', wallet_derive::all_cols() );
-    $defaultcols = implode(',', wallet_derive::default_cols() );
+    $levels = MyLogger::getInstance()->get_level_map();
+    $allcols = implode(',', WalletDerive::all_cols() );
+    $defaultcols = implode(',', WalletDerive::default_cols() );
     
     $loglevels = implode(',', array_values( $levels ));
      
@@ -205,13 +207,13 @@ END;
 function get_cols( $params ) {
     $arg = strip_whitespace( @$params['cols'] ?: null );
     
-    $allcols = wallet_derive::all_cols();
+    $allcols = WalletDerive::all_cols();
     
     if( $arg == 'all' ) {
         $cols = $allcols;
     }
     else if( !$arg ) {
-        $cols = wallet_derive::default_cols();
+        $cols = WalletDerive::default_cols();
     }
     else {
         $cols = explode( ',', $arg );

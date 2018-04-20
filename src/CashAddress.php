@@ -1,5 +1,6 @@
 <?php
-namespace CashAddress;
+
+namespace App;
 
 // (c) uMCCCS
 // with some minor additions from Har01d @ blockchair.com
