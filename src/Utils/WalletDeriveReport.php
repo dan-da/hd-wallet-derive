@@ -6,7 +6,7 @@
  * Time: 下午6:47
  */
 
-namespace App;
+namespace App\Utils;
 
 use texttable;
 
@@ -18,7 +18,8 @@ class WalletDeriveReport
     /* prints out single report in one of several possible formats,
      * or multiple reports, one for each possible format.
      */
-    static public function print_results( $params, $results ) {
+    static public function printResults($params, $results)
+    {
         $format = $params['format'];
         $outfile = @$params['outfile'];
 
@@ -71,9 +72,9 @@ class WalletDeriveReport
 
         fclose( $fh );
 
-        if( $outfile ) {
-            mylogger()->log( "Report was written to $fname", mylogger::specialinfo );
-        }
+//        if( $outfile ) {
+//            mylogger()->log( "Report was written to $fname", mylogger::specialinfo );
+//        }
     }
 
     /* writes out results in json (raw) format

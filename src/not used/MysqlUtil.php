@@ -1,8 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Utils;
 
-require_once( dirname(__FILE__) . '/MyLogger.php' );
+use App\Utils\MyLogger;
+use Exception;
+use PDO;
+use PDOException;
 
 /***
  * A mysql utility class for seorev scripts.

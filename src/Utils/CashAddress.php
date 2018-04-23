@@ -1,6 +1,5 @@
 <?php
 
-namespace App;
 
 // (c) uMCCCS
 // with some minor additions from Har01d @ blockchair.com
@@ -93,7 +92,10 @@ namespace App;
 //
 // For more information, please refer to <http://unlicense.org/>
 
+namespace App\Utils;
+
 use BitWasp\Bitcoin\Bech32;
+
 
 
 class CashAddress

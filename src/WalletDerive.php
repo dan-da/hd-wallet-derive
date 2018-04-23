@@ -8,12 +8,13 @@ require_once __DIR__  . '/../vendor/autoload.php';
 use BitWasp\Bitcoin\Bitcoin;
 use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
-use BitWasp\Bitcoin\Network\Networks\Litecoin;
-use BitWasp\Bitcoin\Network\Networks\Zcash;
+use Exception;
+use App\Utils\NetworkCoinFactory;
+use App\Utils\MyLogger;
+use App\Utils\CashAddress;
 
 // For Bip39 Mnemonics
 use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
-use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 
 
 /* A class that implements HD wallet key/address derivation
@@ -23,10 +24,12 @@ class WalletDerive
 
     // Contains options we care about.
     protected $params;
+    protected $hkf;
     
     public function __construct($params)
     {
         $this->params = $params;
+        $this->hkf = new HierarchicalKeyFactory();
     }
 
     /* Getter for params
@@ -47,36 +50,28 @@ class WalletDerive
 
         $addrs = array();
 
-        switch($coin)
-        {
-            case 'ltc':
+        $networkCoinFactory = new NetworkCoinFactory();
+        $networkCoin = $networkCoinFactory->getNetworkCoinInstance($coin);
 
-                Bitcoin::setNetwork(new Litecoin());
-
-                break;
-
-            case 'zec':
-
-                Bitcoin::setNetwork(new Zcash());
-
-                break;
-
-            default:
-                break;
-        }
+        Bitcoin::setNetwork($networkCoin);
 
         $network = Bitcoin::getNetwork();
 
-
-        $HKF = new HierarchicalKeyFactory();
-
-        $master = $HKF->fromExtended($key, $network);
+        $master = $this->hkf->fromExtended($key, $network);
 
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
 
         $bcashaddress = '';
 
+        /*
+         *  ROOT PATH INCLUSION
+         *
+         *
+         *
+         *
+         *
+         * */
         if( $params['includeroot'] ) {
             $ptpkha = new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash());
             $address = $ptpkha->getAddress();
@@ -87,7 +82,6 @@ class WalletDerive
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
             $pubkey = $master->getPublicKey()->getHex();
-            $pubkeyhash = $master->getPublicKey()->getPubKeyHash()->getHex();
             $xpub = $master->toExtendedPublicKey($network);
 
 
@@ -119,14 +113,16 @@ class WalletDerive
 
         MyLogger::getInstance()->log( "Generating addresses", MyLogger::info );
         $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
-        for( $i = $start; $i < $end; $i ++ ) {
-            if( $i && $i % 10 == 0 ) {
+        for($i = $start; $i < $end; $i++)
+        {
+            if($i && $i % 10 == 0)
+            {
                 MyLogger::getInstance()->log( "Generated $i keys", MyLogger::specialinfo );
             }
             $path = $path_base . "/$i";
             $key = $master->derivePath($path);
             
-            // fixme: hack for copay/multisig.  maybe should use a callback?
+
             if(method_exists($key, 'getPublicKey')) {
                 // bip32 path
                 $ptpkha = new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash());
@@ -177,9 +173,10 @@ class WalletDerive
     }
 
     // converts a bip39 mnemonic string with optional password to an xprv key (string).
-    static public function mnemonicToKey($mnemonic, $password=null) {
-        $bip39 = MnemonicFactory::bip39();
-        $seedGenerator = new Bip39SeedGenerator($bip39);
+    public function mnemonicToKey($mnemonic, $password = null)
+    {
+//        $bip39 = MnemonicFactory::bip39();
+        $seedGenerator = new Bip39SeedGenerator();
 
         // Derive a seed from mnemonic/password
         $seed = $seedGenerator->getSeed($mnemonic, $password);
@@ -188,19 +185,21 @@ class WalletDerive
         // mylogger()->log( "Seed: " . $seed->getHex(), mylogger::info );
         // echo $seed->getHex() . "\n";
         
-        $bip32 = \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory::fromEntropy($seed);
+        $bip32 = $this->hkf->fromEntropy($seed);
         return $bip32->toExtendedKey();
     }
 
     /* Returns all columns available for reports
      */
-    static public function all_cols() {
+    static public function all_cols()
+    {
         return ['path', 'address', 'bitcoincash', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
     }
 
     /* Returns default reporting columns
      */
-    static public function default_cols() {
+    static public function default_cols()
+    {
         return ['path', 'address', 'privkey'];
     }
 }

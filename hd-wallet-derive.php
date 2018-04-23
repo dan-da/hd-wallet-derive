@@ -12,38 +12,44 @@ require_once __DIR__ . '/vendor/autoload.php';
 \strictmode\initializer::init();
 
 
-use App\MyLogger;
+use App\Utils\MyLogger;
 use App\WalletDerive;
-use App\WalletDeriveReport;
+use App\Utils\WalletDeriveReport;
+use App\Utils\Util;
 
-/**
- * Call main and exit with return code.
- */
-exit(main($argv));
+
 
 /**
  * Our main function.  It performs top-level exception handling.
  */
-function main( $argv ) {
+function main()
+{
     // why limit ourselves?    ;-)
     ini_set('memory_limit', -1 );
 
-    try {
-        list( $params, $success ) = process_cli_params( get_cli_params( $argv ));
-        if( $success != 0 ) {
+    try
+    {
+        // CLI Parameters processing
+        list( $params, $success ) = Util::processCliParams();
+        if( $success != 0 )
+        {
             return $success;
         }
 
-        $worker = new WalletDerive( $params );
+        // Creates WalletDerive object
+        $walletDerive = new WalletDerive($params);
 
-        $key = @$params['key'] ?: $worker->mnemonicToKey( $params['mnemonic'], $params['mnemonic-pw'] );
-        $addrs = $worker->derive_keys($key);
-        
+        // Key derived from mnemonic if mnemonic is choosen
+        $key = @$params['key'] ?: $walletDerive->mnemonicToKey($params['mnemonic'], $params['mnemonic-pw']);
+        $addrs = $walletDerive->derive_keys($key);
+
+        // Prints result
         echo "\n";
-        WalletDeriveReport::print_results($params, $addrs);
+        WalletDeriveReport::printResults($params, $addrs);
         return 0;
     }
-    catch( Exception $e ) {
+    catch(Exception $e)
+    {
         MyLogger::getInstance()->log_exception( $e );
         
         // print validation errors to stderr.
@@ -54,182 +60,4 @@ function main( $argv ) {
     }
 }
 
-/* returns the CLI params, exactly as entered by user.
- */
-function get_cli_params() {
-    $params = getopt( 'g', array( 'key:',
-                                  'coin:',
-                                  'mnemonic:',
-                                  'mnemonic-pw:',
-                                  'outfile:',
-                                  'numderive:', 'startindex:',
-                                  'includeroot',
-                                  'path:',
-                                  'format:', 'cols:',
-                                  'logfile:', 'loglevel:',
-                                  'list-cols',
-                                  'version', 'help',
-                                  ) );        
-
-    return $params;
-}
-
-/* processes and sanitizes the CLI params. adds defaults
- * and ensure each value is set.
- */
-function process_cli_params( $params ) {
-    $success = 0;   // 0 == success.
-    
-    if( isset( $params['version'] ) ) {
-        print_version();
-        return [$params, 2];
-    }
-    if( isset( $params['help']) || !isset($params['g']) ) {
-        print_help();
-        return [$params, 1];
-    }
-
-    if( !isset($params['coin']) ) {
-        print_help();
-        return [$params, 1];
-    }
-    
-    if( @$params['logfile'] ) {
-        mylogger()->set_log_file( $params['logfile'] );
-        mylogger()->echo_log = false;
-    }
-
-    $loglevel = @$params['loglevel'] ?: 'specialinfo';
-    MyLogger::getInstance()->set_log_level_by_name( $loglevel );
-
-    $key = @$params['key'];
-    $mnemonic = @$params['mnemonic'];
-    
-    if( !$key && !$mnemonic ) {
-        throw new Exception( "--key or --mnemonic must be specified." );
-    }
-    $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
-    
-    if( @$params['path'] && !is_numeric($params['path']) && $params['path']{0} != 'm' ) {
-        throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
-    }
-    
-    $params['cols'] = get_cols( $params );
-    if ( !isset( $params['path'] )){
-      $params['path'] = 'm';
-    } 
-  
-    $params['format'] = @$params['format'] ?: 'txt';
-    $params['cols'] = @$params['cols'] ?: 'all';
-    $params['numderive'] = @$params['numderive'] ?: 10;
-    $params['startindex'] = @$params['startindex'] ?: 0;
-    $params['includeroot'] = isset($params['includeroot'] );
-
-    return [$params, $success];
-}
-
-/**
- * prints program version text
- */
-function print_version() {
-    $version = @file_get_contents(  __DIR__ . '/VERSION');
-    echo $version ?: 'version unknown' . "\n";
-}
-
-
-/* prints CLI help text
- */
-function print_help() {
-    
-    $levels = MyLogger::getInstance()->get_level_map();
-    $allcols = implode(',', WalletDerive::all_cols() );
-    $defaultcols = implode(',', WalletDerive::default_cols() );
-    
-    $loglevels = implode(',', array_values( $levels ));
-     
-    $buf = <<< END
-
-   hd-wallet-derive.php
-
-   This script derives private keys and public addresses
-
-   Options:
-
-    -g                   go!  ( required )
-    
-    --coin=<coin>        Coin (btc, ltc, bcc) ( required )
-    
-    --key=<key>          xpriv or xpub key
-    --mnemonic=<words>   bip39 seed words
-                           note: either key or nmemonic is required.
-                           
-    --mnemonic-pw=<pw>   optionally specify password for mnemonic.
-
-    --numderive=<n>      Number of keys to derive.  default=10
-
-    --startindex=<n>     Index to start deriving keys from.  default=0
-                            
-    --cols=<cols>        a csv list of columns, or "all"
-                         all:
-                          ($allcols)
-                         default:
-                          ($defaultcols)
-
-    --outfile=<path>     specify output file path.
-    --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
-    
-                         if 'all' is specified then a file will be created
-                         for each format with appropriate extension.
-                         only works when outfile is specified.
-                         
-                         'list' prints only the first column. see --cols
-                         
-    --path=<path>        bip32 path to derive, relative to provided key (m).
-                           eg "", "m/0" or "m/1"
-                           default = "m"
-                           
-    --includeroot       include root key as first element of report.
-    
-    --logfile=<file>    path to logfile. if not present logs to stdout.
-    --loglevel=<level>  $loglevels
-                          default = info
-    
-
-
-END;
-
-   fprintf( STDERR, $buf );       
-        
-}
-
-/* parses the --cols argument and returns an array of columns.
- */
-function get_cols( $params ) {
-    $arg = strip_whitespace( @$params['cols'] ?: null );
-    
-    $allcols = WalletDerive::all_cols();
-    
-    if( $arg == 'all' ) {
-        $cols = $allcols;
-    }
-    else if( !$arg ) {
-        $cols = WalletDerive::default_cols();
-    }
-    else {
-        $cols = explode( ',', $arg );
-        foreach( $cols as $c ) {
-            if( !in_array($c, $allcols) ) {
-                throw new Exception( "'$c' is not a known report column.", 2 );
-            }
-        }
-    }
-
-    return $cols;
-}
-
-
-/* removes whitespace from a string
- */
-function strip_whitespace( $str ) {
-    return preg_replace('/\s+/', '', $str);
-}
+main();

@@ -1,12 +1,13 @@
 <?php
 
-namespace App;
+namespace App\Utils;
 
 /***
  * A helper function to access single instance of logger class from anywhere.
  * usage: mylogger()->log( "log message", mymylogger::info );
  */
 
+use Exception;
 
 /***
  * A logging class.  Use it!
