@@ -125,7 +125,7 @@ class WalletDeriveReport
             return $html;
         }
 
-        $table = new html_table();
+        $table = new HtmlTable();
         $table->header_attrs = array();
         $table->table_attrs = array( 'class' => 'wallet-derive bordered' );
         $html .= $table->table_with_header( $data, $header );
