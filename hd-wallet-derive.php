@@ -60,6 +60,7 @@ function get_cli_params() {
                                   'mnemonic-pw:',
                                   'outfile:',
                                   'numderive:',
+                                  'startderive:',
                                   'includeroot',
                                   'path:',
                                   'format:', 'cols:',
@@ -112,6 +113,7 @@ function process_cli_params( $params ) {
     $params['format'] = @$params['format'] ?: 'txt';
     $params['cols'] = @$params['cols'] ?: 'all';
     $params['numderive'] = @$params['numderive'] ?: 10;
+    $params['startderive'] = @$params['startderive'] ?: 0;
     $params['includeroot'] = isset($params['includeroot'] );
 
     return [$params, $success];
@@ -153,6 +155,8 @@ function print_help() {
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
 
     --numderive=<n>      Number of keys to derive.  default=10
+
+    --startderive=<n>    Starting key index to derive.  default=0
                             
     --cols=<cols>        a csv list of columns, or "all"
                          all:

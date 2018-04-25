@@ -7,10 +7,19 @@ use \BitWasp\Bitcoin\Bitcoin;
 use \BitWasp\Bitcoin\Address;
 use \BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
 use \BitWasp\Buffertools\Buffer;
+use \BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 
 // For Bip39 Mnemonics
 use \BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
 use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
+
+// For ethereum addresses
+use kornrunner\Keccak;
+use BitWasp\Bitcoin\Crypto\EcAdapter\Key\PublicKeyInterface;
+use BitWasp\Bitcoin\Crypto\EcAdapter\Impl\PhpEcc\Serializer\Key\PublicKeySerializer;
+use BitWasp\Bitcoin\Crypto\EcAdapter\EcAdapterFactory;
+use Mdanter\Ecc\Serializer\Point\UncompressedPointSerializer;
+use Mdanter\Ecc\EccFactory;
 
 // For generating html tables.
 require_once __DIR__ . '/html_table.class.php';
@@ -36,6 +45,40 @@ class wallet_derive {
         return $this->params;
     }
 
+    private function getEthereumAddress(PublicKeyInterface $publicKey){
+    	static $pubkey_serializer = null;
+    	static $point_serializer = null;
+    	if(!$pubkey_serializer){
+    		$adapter = EcAdapterFactory::getPhpEcc(Bitcoin::getMath(), Bitcoin::getGenerator());
+    		$pubkey_serializer = new PublicKeySerializer($adapter);
+    		$point_serializer = new UncompressedPointSerializer(EccFactory::getAdapter());
+    	}
+
+    	$pubKey = $pubkey_serializer->parse($publicKey->getHex());
+    	$point = $pubKey->getPoint();
+    	$upk = $point_serializer->serialize($point);
+    	$upk = hex2bin(substr($upk, 2));
+
+        $keccak = Keccak::hash($upk, 256);
+        $eth_address_lower = strtolower(substr($keccak, -40));
+
+        $hash = Keccak::hash($eth_address_lower, 256);
+        $eth_address = '';
+        for($i = 0; $i < 40; $i++) {
+        	// the nth letter should be uppercase if the nth digit of casemap is 1
+        	$char = substr($eth_address_lower, $i, 1);
+
+        	if(ctype_digit($char))
+        		$eth_address .= $char;
+        	else if('0' <= $hash[$i] && $hash[$i] <= '7')
+        		$eth_address .= strtolower($char);
+        	else 
+        		$eth_address .= strtoupper($char);
+        }
+
+        return '0x'. $eth_address;
+    }
+
     /* Derives child keys/addresses for a given key.
      */
     public function derive_keys($key) {
@@ -49,16 +92,20 @@ class wallet_derive {
         $master = HierarchicalKeyFactory::fromExtended($key, $network);
         
         
-        $start = 0;
-        $end = $params['numderive'];
+        $start = $params['startderive'];
+        $end = $params['startderive'] + $params['numderive'];
         
         if( $params['includeroot'] ) {
-            $address = $master->getPublicKey()->getAddress()->getAddress();
+			$publicKey = $master->getPublicKey();
+			$address = new PayToPubKeyHashAddress($publicKey->getPubKeyHash());
+			$address = $address->getAddress();
+
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
-            $pubkey = $master->getPublicKey()->getHex();
-            $pubkeyhash = $master->getPublicKey()->getPubKeyHash()->getHex();
+            $pubkey = $publicKey->getHex();
+            $pubkeyhash = $publicKey->getPubKeyHash()->getHex();
             $xpub = $master->toExtendedPublicKey($network);
+            $eth_address = $this->getEthereumAddress($publicKey);
 
             $addrs[] = array( 'xprv' => $xprv,
                               'privkey' => $wif,
@@ -66,6 +113,7 @@ class wallet_derive {
                               'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
+                              'eth_address' => $eth_address,
                               'index' => null,
                               'path' => 'm');
         }
@@ -82,12 +130,17 @@ class wallet_derive {
             // fixme: hack for copay/multisig.  maybe should use a callback?
             if(method_exists($key, 'getPublicKey')) {
                 // bip32 path
-                $address = $key->getPublicKey()->getAddress()->getAddress();
+				$publicKey = $key->getPublicKey();
+				$address = new PayToPubKeyHashAddress($publicKey->getPubKeyHash());
+				$address = $address->getAddress();
+
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
                 $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
-                $pubkey = $key->getPublicKey()->getHex();
-                $pubkeyhash = $key->getPublicKey()->getPubKeyHash()->getHex();
+                $pubkey = $publicKey->getHex();
+                $pubkeyhash = $publicKey->getPubKeyHash()->getHex();
                 $xpub = $key->toExtendedPublicKey($network);
+
+            	$eth_address = $this->getEthereumAddress($publicKey);
             }
             else {
                 throw new Exception("multisig keys not supported");
@@ -98,6 +151,7 @@ class wallet_derive {
                               'pubkeyhash' => $pubkeyhash,
                               'xpub' => $xpub,
                               'address' => $address,
+                              'eth_address' => $eth_address,
                               'index' => $i,
                               'path' => $path);
         }
@@ -124,7 +178,7 @@ class wallet_derive {
     /* Returns all columns available for reports
      */
     static public function all_cols() {
-        return ['path', 'address', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
+        return ['path', 'address', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index', 'eth_address'];
     }
 
     /* Returns default reporting columns
