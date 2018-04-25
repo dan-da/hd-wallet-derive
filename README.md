@@ -1,8 +1,8 @@
 # hd-wallet-derive
 
-A command-line tool that derives bip32 addresses and private keys.
+A command-line tool that derives bip32 addresses and private keys for Bitcoin and Ethereum.
 
-Derivation reports show privkey (wif encoded), xprv, xpub, and address.
+Derivation reports show privkey (wif encoded), xprv, xpub, and addresses for Bitcoin and Ethereum .
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
 optional password.
@@ -246,34 +246,38 @@ The report may be printed in the following formats:
    Options:
 
     -g                   go!  ( required )
-    
+
     --key=<key>          xpriv or xpub key
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
-                           
+
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
-                            
+
+    --numderive=<n>      Number of keys to derive.  default=10
+
+    --startderive=<n>    Starting key index to derive.  default=0
+
     --cols=<cols>        a csv list of columns, or "all"
                          all:
-                          (path,xprv,xpub,privkey,address,index)
+                          (path,address,xprv,xpub,privkey,pubkey,pubkeyhash,index,eth_address)
                          default:
-                          (path,privkey,address)
+                          (path,address,privkey)
 
     --outfile=<path>     specify output file path.
     --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
-    
+
                          if 'all' is specified then a file will be created
                          for each format with appropriate extension.
                          only works when outfile is specified.
-                         
+
                          'list' prints only the first column. see --cols
-                         
+
     --path=<path>        bip32 path to derive, relative to provided key (m).
                            eg "", "m/0" or "m/1"
                            default = "m"
-                           
+
     --includeroot       include root key as first element of report.
-    
+
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  debug,info,specialinfo,warning,exception,fatalerror
                           default = info
