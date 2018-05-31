@@ -4,7 +4,6 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "afb151388059fa59bc2a7203235b32e1",
     "content-hash": "cc86c055f74821c662432ff25e258b2d",
     "packages": [
         {
@@ -13,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Bit-Wasp/bitcoin-php.git",
-                "reference": "e688ea03d3c3e6c717a859c9d79cb9393dfe67b5"
+                "reference": "00414aa71ca81d53518ca79be32f31b9fe50a022"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Bit-Wasp/bitcoin-php/zipball/e688ea03d3c3e6c717a859c9d79cb9393dfe67b5",
-                "reference": "e688ea03d3c3e6c717a859c9d79cb9393dfe67b5",
+                "url": "https://api.github.com/repos/Bit-Wasp/bitcoin-php/zipball/00414aa71ca81d53518ca79be32f31b9fe50a022",
+                "reference": "00414aa71ca81d53518ca79be32f31b9fe50a022",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +62,7 @@
             ],
             "description": "PHP Bitcoin library with functions for transactions, signatures, serialization, Random/Deterministic ECDSA keys, blocks, RPC bindings",
             "homepage": "https://github.com/bit-wasp/bitcoin-php",
-            "time": "2018-04-04 16:57:47"
+            "time": "2018-05-17T20:31:38+00:00"
         },
         {
             "name": "bitwasp/buffertools",
@@ -108,7 +107,7 @@
                 }
             ],
             "description": "Toolbox for working with binary and hex data. Similar to NodeJS Buffer.",
-            "time": "2017-12-27 19:23:12"
+            "time": "2017-12-27T19:23:12+00:00"
         },
         {
             "name": "bitwasp/secp256k1-php",
@@ -155,7 +154,7 @@
                 "php",
                 "secp256k1"
             ],
-            "time": "2018-03-18 20:49:40"
+            "time": "2018-03-18T20:49:40+00:00"
         },
         {
             "name": "composer/semver",
@@ -217,7 +216,7 @@
                 "validation",
                 "versioning"
             ],
-            "time": "2017-11-06 09:05:54"
+            "time": "2017-11-06T09:05:54+00:00"
         },
         {
             "name": "dan-da/strictmode-php",
@@ -243,7 +242,7 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2017-09-06 13:19:46"
+            "time": "2017-09-06T13:19:46+00:00"
         },
         {
             "name": "dan-da/tester-php",
@@ -264,7 +263,7 @@
             ],
             "type": "library",
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2017-09-06 11:40:46"
+            "time": "2017-09-06T11:40:46+00:00"
         },
         {
             "name": "dan-da/texttable-php",
@@ -290,7 +289,7 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2017-09-06 13:51:24"
+            "time": "2017-09-06T13:51:24+00:00"
         },
         {
             "name": "fgrosse/phpasn1",
@@ -359,7 +358,7 @@
                 "x509",
                 "x690"
             ],
-            "time": "2018-03-31 08:32:19"
+            "time": "2018-03-31T08:32:19+00:00"
         },
         {
             "name": "lastguest/murmurhash",
@@ -406,7 +405,7 @@
                 "hashing",
                 "murmur"
             ],
-            "time": "2017-10-10 15:16:12"
+            "time": "2017-10-10T15:16:12+00:00"
         },
         {
             "name": "mdanter/ecc",
@@ -478,7 +477,7 @@
                 "secp256k1",
                 "secp256r1"
             ],
-            "time": "2017-10-09 16:05:37"
+            "time": "2017-10-09T16:05:37+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -526,7 +525,7 @@
                 "pseudorandom",
                 "random"
             ],
-            "time": "2018-04-04 21:24:14"
+            "time": "2018-04-04T21:24:14+00:00"
         },
         {
             "name": "pleonasm/merkle-tree",
@@ -569,7 +568,7 @@
                 }
             ],
             "description": "An implementation of a Merkle Tree in PHP",
-            "time": "2013-05-22 20:46:20"
+            "time": "2013-05-22T20:46:20+00:00"
         }
     ],
     "packages-dev": [],
