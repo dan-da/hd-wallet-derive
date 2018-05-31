@@ -10,6 +10,7 @@ namespace App\Utils;
 
 
 use BitWasp\Bitcoin\Network\Network;
+use BitWasp\Bitcoin\Network\Networks\Bitcoin;
 use BitWasp\Bitcoin\Network\Networks\Litecoin;
 use BitWasp\Bitcoin\Network\Networks\Zcash;
 
@@ -33,6 +34,7 @@ class NetworkCoinFactory extends Network
 
             default:
                 // for BTC and BCC, the dafult Network is already used
+                return new Bitcoin();
                 break;
         }
     }
