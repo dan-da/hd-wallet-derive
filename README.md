@@ -131,6 +131,20 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 +-----------------------------------------------------------------------------------------------------------------+------------------------------------+
 ```
 
+## We can view ethereum addresses.
+
+```
+$ ./hd-wallet-derive.php --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --cols=path,address,eth_address --numderive=3 -g
+
++------+------------------------------------+--------------------------------------------+
+| path | address                            | eth_address                                |
++------+------------------------------------+--------------------------------------------+
+| m/0  | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge | 0xc7eE60fFD437cf206A4E6deFaEd020c54b63d3f5 |
+| m/1  | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi | 0x96790F426AC663989605B806Ac8360891bD76359 |
+| m/2  | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr | 0x76580a4cD31C5EC607a713C922Fd3dE278Ab49c1 |
++------+------------------------------------+--------------------------------------------+
+```
+
 ## We can get results in a variety of additional formats
 
 ### simple list
