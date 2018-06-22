@@ -1,8 +1,8 @@
 # hd-wallet-derive
 
-A command-line tool that derives bip32 addresses and private keys.
+A command-line tool that derives bip32 addresses and private keys for Bitcoin and Ethereum.
 
-Derivation reports show privkey (wif encoded), xprv, xpub, and address.
+Derivation reports show privkey (wif encoded), xprv, xpub, and addresses for Bitcoin and Ethereum .
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
 optional password.
@@ -131,6 +131,20 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 +-----------------------------------------------------------------------------------------------------------------+------------------------------------+
 ```
 
+## We can view ethereum addresses.
+
+```
+$ ./hd-wallet-derive.php --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --cols=path,address,eth_address --numderive=3 -g
+
++------+------------------------------------+--------------------------------------------+
+| path | address                            | eth_address                                |
++------+------------------------------------+--------------------------------------------+
+| m/0  | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge | 0xc7eE60fFD437cf206A4E6deFaEd020c54b63d3f5 |
+| m/1  | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi | 0x96790F426AC663989605B806Ac8360891bD76359 |
+| m/2  | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr | 0x76580a4cD31C5EC607a713C922Fd3dE278Ab49c1 |
++------+------------------------------------+--------------------------------------------+
+```
+
 ## We can get results in a variety of additional formats
 
 ### simple list
@@ -246,34 +260,38 @@ The report may be printed in the following formats:
    Options:
 
     -g                   go!  ( required )
-    
+
     --key=<key>          xpriv or xpub key
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
-                           
+
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
-                            
+
+    --numderive=<n>      Number of keys to derive.  default=10
+
+    --startderive=<n>    Starting key index to derive.  default=0
+
     --cols=<cols>        a csv list of columns, or "all"
                          all:
-                          (path,xprv,xpub,privkey,address,index)
+                          (path,address,xprv,xpub,privkey,pubkey,pubkeyhash,index,eth_address)
                          default:
-                          (path,privkey,address)
+                          (path,address,privkey)
 
     --outfile=<path>     specify output file path.
     --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
-    
+
                          if 'all' is specified then a file will be created
                          for each format with appropriate extension.
                          only works when outfile is specified.
-                         
+
                          'list' prints only the first column. see --cols
-                         
+
     --path=<path>        bip32 path to derive, relative to provided key (m).
                            eg "", "m/0" or "m/1"
                            default = "m"
-                           
+
     --includeroot       include root key as first element of report.
-    
+
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  debug,info,specialinfo,warning,exception,fatalerror
                           default = info

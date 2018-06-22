@@ -6,9 +6,7 @@
         "ext-json": "*",
         "php": ">=5.5",
         "dan-da/texttable-php": "^1.0",
-        "dan-da/strictmode-php": "^1.0"
-    },
-
-    "require-dev": {
+        "dan-da/strictmode-php": "^1.0",
+        "kornrunner/keccak": "^1.0"
     }
 }
