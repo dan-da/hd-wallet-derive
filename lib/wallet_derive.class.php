@@ -46,18 +46,18 @@ class wallet_derive {
     }
 
     private function getEthereumAddress(PublicKeyInterface $publicKey){
-    	static $pubkey_serializer = null;
-    	static $point_serializer = null;
-    	if(!$pubkey_serializer){
-    		$adapter = EcAdapterFactory::getPhpEcc(Bitcoin::getMath(), Bitcoin::getGenerator());
-    		$pubkey_serializer = new PublicKeySerializer($adapter);
-    		$point_serializer = new UncompressedPointSerializer(EccFactory::getAdapter());
-    	}
+        static $pubkey_serializer = null;
+        static $point_serializer = null;
+        if(!$pubkey_serializer){
+            $adapter = EcAdapterFactory::getPhpEcc(Bitcoin::getMath(), Bitcoin::getGenerator());
+            $pubkey_serializer = new PublicKeySerializer($adapter);
+            $point_serializer = new UncompressedPointSerializer(EccFactory::getAdapter());
+        }
 
-    	$pubKey = $pubkey_serializer->parse($publicKey->getHex());
-    	$point = $pubKey->getPoint();
-    	$upk = $point_serializer->serialize($point);
-    	$upk = hex2bin(substr($upk, 2));
+        $pubKey = $pubkey_serializer->parse($publicKey->getHex());
+        $point = $pubKey->getPoint();
+        $upk = $point_serializer->serialize($point);
+        $upk = hex2bin(substr($upk, 2));
 
         $keccak = Keccak::hash($upk, 256);
         $eth_address_lower = strtolower(substr($keccak, -40));
@@ -65,15 +65,15 @@ class wallet_derive {
         $hash = Keccak::hash($eth_address_lower, 256);
         $eth_address = '';
         for($i = 0; $i < 40; $i++) {
-        	// the nth letter should be uppercase if the nth digit of casemap is 1
-        	$char = substr($eth_address_lower, $i, 1);
+            // the nth letter should be uppercase if the nth digit of casemap is 1
+            $char = substr($eth_address_lower, $i, 1);
 
-        	if(ctype_digit($char))
-        		$eth_address .= $char;
-        	else if('0' <= $hash[$i] && $hash[$i] <= '7')
-        		$eth_address .= strtolower($char);
-        	else 
-        		$eth_address .= strtoupper($char);
+            if(ctype_digit($char))
+                $eth_address .= $char;
+            else if('0' <= $hash[$i] && $hash[$i] <= '7')
+                $eth_address .= strtolower($char);
+            else 
+                $eth_address .= strtoupper($char);
         }
 
         return '0x'. $eth_address;
@@ -96,9 +96,9 @@ class wallet_derive {
         $end = $params['startderive'] + $params['numderive'];
         
         if( $params['includeroot'] ) {
-			$publicKey = $master->getPublicKey();
-			$address = new PayToPubKeyHashAddress($publicKey->getPubKeyHash());
-			$address = $address->getAddress();
+            $publicKey = $master->getPublicKey();
+            $address = new PayToPubKeyHashAddress($publicKey->getPubKeyHash());
+            $address = $address->getAddress();
 
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
@@ -130,9 +130,9 @@ class wallet_derive {
             // fixme: hack for copay/multisig.  maybe should use a callback?
             if(method_exists($key, 'getPublicKey')) {
                 // bip32 path
-				$publicKey = $key->getPublicKey();
-				$address = new PayToPubKeyHashAddress($publicKey->getPubKeyHash());
-				$address = $address->getAddress();
+                $publicKey = $key->getPublicKey();
+                $address = new PayToPubKeyHashAddress($publicKey->getPubKeyHash());
+                $address = $address->getAddress();
 
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
                 $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
@@ -140,7 +140,7 @@ class wallet_derive {
                 $pubkeyhash = $publicKey->getPubKeyHash()->getHex();
                 $xpub = $key->toExtendedPublicKey($network);
 
-            	$eth_address = $this->getEthereumAddress($publicKey);
+                $eth_address = $this->getEthereumAddress($publicKey);
             }
             else {
                 throw new Exception("multisig keys not supported");
