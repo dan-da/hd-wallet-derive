@@ -7,6 +7,6 @@
         "php": ">=5.5",
         "dan-da/texttable-php": "^1.0",
         "dan-da/strictmode-php": "^1.0",
-        "greensea/keccak": "^1.0.3"
+        "olegabr/keccak": "^1.0.4"
     }
 }
