@@ -56,7 +56,7 @@ class WalletDeriveReport
 
     /* prints out single report in specified format, either to stdout or file.
      */
-    static protected function print_results_worker( $summary, $results, $outfile, $format ) {
+    static public function print_results_worker( $summary, $results, $outfile, $format ) {
 
         $fname = $outfile ?: 'php://stdout';
         $fh = fopen( $fname, 'w' );

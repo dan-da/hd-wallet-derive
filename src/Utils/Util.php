@@ -30,7 +30,7 @@ class Util
             'format:', 'cols:',
             'logfile:', 'loglevel:',
             'list-cols',
-            'version', 'help',
+            'version', 'help', 'helpcoins',
         );
 
         $params = getopt( 'g', $paramsArray);
@@ -53,6 +53,15 @@ class Util
             return [$params, 2];
         }
 
+        // format and cols must be set prior to calling ::printHelpCoins()
+        $params['format'] = @$params['format'] ?: 'txt';
+        $params['cols'] = @$params['cols'] ?: 'all';
+        
+        if(isset($params['helpcoins'])) {
+            static::printHelpCoins( $params );
+            return [$params, 1];
+        }
+        
         if(isset($params['help']) || !isset($params['g'])) {
             static::printHelp();
             return [$params, 1];
@@ -87,8 +96,6 @@ class Util
             $params['path'] = 'm';
         }
 
-        $params['format'] = @$params['format'] ?: 'txt';
-        $params['cols'] = @$params['cols'] ?: 'all';
         $params['numderive'] = @$params['numderive'] ?: 10;
         $params['startindex'] = @$params['startindex'] ?: 0;
         $params['includeroot'] = isset($params['includeroot'] );
@@ -116,8 +123,7 @@ class Util
         $levels = MyLogger::getInstance()->get_level_map();
         $allcols = implode(',', WalletDerive::all_cols() );
         $defaultcols = implode(',', WalletDerive::default_cols() );
-        $allcoins = implode(',', array_keys(NetworkCoinFactory::getNetworkCoinsList()) );
-
+        
         $loglevels = implode(',', array_values( $levels ));
 
         $buf = <<< END
@@ -129,17 +135,19 @@ class Util
    Options:
 
     -g                   go!  ( required )
-    
-    --coin=<coin>        Coin Symbol ( default = btc )
-                         available:
-                          ($allcoins)
-    
+        
     --key=<key>          xpriv or xpub key
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
                            
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
 
+    --coin=<coin>        Coin Symbol ( default = btc )
+                         See --helpcoins for a list.
+                         
+    --helpcoins          List all available coins/networks.
+                         --format applies to output.
+    
     --numderive=<n>      Number of keys to derive.  default=10
 
     --startindex=<n>     Index to start deriving keys from.  default=0
@@ -175,6 +183,20 @@ END;
 
         fprintf( STDERR, $buf );
 
+    }
+    
+    public static function printHelpCoins( $params ) {
+        $allcoins = NetworkCoinFactory::getNetworkCoinsList();
+        
+        $data = [];
+        foreach($allcoins as $k => $v) {
+            $data[] = ['Symbol' => $k,
+                       'Coin / Network' => $v];
+        }
+        
+        $summary = [];
+        WalletDeriveReport::print_results_worker($summary, $data, null, $params['format']);
+        echo "\n\n";
     }
 
     /* parses the --cols argument and returns an array of columns.
