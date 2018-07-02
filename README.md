@@ -1,8 +1,8 @@
 # hd-wallet-derive
 
-A command-line tool that derives bip32 addresses and private keys for Bitcoin and Ethereum.
+A command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins.
 
-Derivation reports show privkey (wif encoded), xprv, xpub, and addresses for Bitcoin and Ethereum .
+Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
 optional password.
@@ -131,19 +131,39 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 +-----------------------------------------------------------------------------------------------------------------+------------------------------------+
 ```
 
-## We can view ethereum addresses.
+## Let's find what altcoins are supported.
 
 ```
-$ ./hd-wallet-derive.php --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR --cols=path,address,eth_address --numderive=3 -g
+$ ./hd-wallet-derive.php --helpcoins
++--------------------+------------------------------------+
+| Symbol             | Coin / Network                     |
++--------------------+------------------------------------+
+...
+| ZEC                | Zcash - Mainnet                    |
+| ZEC-test           | Zcash - Testnet                    |
+| ZEC-regtest        | Zcash - Regtest                    |
+...
++--------------------+------------------------------------+
 
-+------+------------------------------------+--------------------------------------------+
-| path | address                            | eth_address                                |
-+------+------------------------------------+--------------------------------------------+
-| m/0  | 1FZKdR3E7S1UPvqsuqStXAhZiovntFirge | 0xc7eE60fFD437cf206A4E6deFaEd020c54b63d3f5 |
-| m/1  | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi | 0x96790F426AC663989605B806Ac8360891bD76359 |
-| m/2  | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr | 0x76580a4cD31C5EC607a713C922Fd3dE278Ab49c1 |
-+------+------------------------------------+--------------------------------------------+
 ```
+
+Note that testnet and regtest are supported for many coins.
+
+## We can view altcoin addresses.
+
+```
+$ ./hd-wallet-derive.php --key=xprv9zbB6Xchu2zRkf6jSEnH9vuy7tpBuq2njDRr9efSGBXSYr1QtN8QHRur28QLQvKRqFThCxopdS1UD61a5q6jGyuJPGLDV9XfYHQto72DAE8 --cols=path,address --coin=ZEC --numderive=3 -g
+coin: ZEC, net: main
+
++------+-------------------------------------+
+| path | address                             |
++------+-------------------------------------+
+| m/0  | t1V1Qp41kbHn159hvVXZL5M1MmVDRe6EdpA |
+| m/1  | t1Tw6iqFY1g9dKeAqPDAncaUjha8cn9SZqX |
+| m/2  | t1VGTPzBSSYd27GF8p9rGKGdFuWekKRhug4 |
++------+-------------------------------------+
+```
+
 
 ## We can get results in a variety of additional formats
 
