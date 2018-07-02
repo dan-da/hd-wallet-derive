@@ -19,7 +19,6 @@ class FlexNetwork extends Network {
         if(strstr($coin, '-')) {
             list($coin, $network) = explode('-', $coin);
         }
-        echo "coin: $coin, net: $network\n";
         
         $params = coinParams::get_coin_network($coin, $network);
         
