@@ -6,7 +6,8 @@
         "ext-json": "*",
         "php": ">=5.5",
         "dan-da/texttable-php": "^1.0",
-        "dan-da/strictmode-php": "^1.0"
+        "dan-da/strictmode-php": "^1.0",
+        "dan-da/coinparams": "^0.2.0"
     },
 
     "require-dev": {},
