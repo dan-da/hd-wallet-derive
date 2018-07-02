@@ -179,6 +179,7 @@ class WalletDerive
         $seedGenerator = new Bip39SeedGenerator();
 
         // Derive a seed from mnemonic/password
+        $password = $password === null ? '' : $password;
         $seed = $seedGenerator->getSeed($mnemonic, $password);
         
         // not logging seed.  just in case somebody keeps logs in insecure location.
