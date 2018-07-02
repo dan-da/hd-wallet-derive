@@ -350,6 +350,5 @@ things.
 
 # Todos
 
-* add test cases
-* Add bip39 support to obtain xpub from secret words.  maybe?
+* add test cases, ideally for each coin.
 * web frontend, maybe just for xpub keys, or to run locally.
