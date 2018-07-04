@@ -39,19 +39,19 @@ function main()
 
         // Creates WalletDerive object
         $walletDerive = new WalletDerive($params);
+        if($params['gen-key-all']) {
+            $result = $walletDerive->genRandomKeyForAllNetworks();
+            WalletDeriveReport::printResults($params, $result, true);
+            return 0;
+        }
         if($params['gen-key']) {
             $result = $walletDerive->genRandomKeyForNetwork($params['coin']);
             WalletDeriveReport::printResults($params, [$result], true);
             return 0;
         }
-        else if($params['gen-key-all']) {
-            $result = $walletDerive->genRandomKeyForAllNetworks();
-            WalletDeriveReport::printResults($params, $result, true);
-            return 0;
-        }
 
         // Key derived from mnemonic if mnemonic is choosen
-        if( !@$params['key'] && $params['mnemonic'] && !@$orig_params['path']) {
+        if( !@$params['key'] && @$params['mnemonic'] && !@$orig_params['path']) {
             $path = $walletDerive->getCoinBip44ExtKeyPath($params['coin']);
             if($path) {
                 $params['path'] = $path;
