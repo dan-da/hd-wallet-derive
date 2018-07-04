@@ -2,6 +2,8 @@
 
 A command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins.
 
+As of version 0.3.2, over 300 altcoins are available, 97 with bip44 path information.
+
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
@@ -66,7 +68,7 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 ## Derive addresses from bip39 mnemonic seed words. (no password)
 
 ```
-$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" --path="m/44'/0'/0'/0"  -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
+$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
 
 +-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | path            | address                            | privkey                                              | pubkey                                                             | xprv                                                                                                            |
@@ -77,7 +79,11 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 +-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+note: The --path argument defaults to the bip44 extended key path when using
+--mnemonic to make address generation easier.  If a Bip44 ID is not defined for
+the coin then --path must be specified explicitly.
+
+you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
 
 
 ## Derive addresses from bip39 mnemonic seed words. (with password)
