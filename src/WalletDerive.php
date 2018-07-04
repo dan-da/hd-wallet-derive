@@ -75,15 +75,12 @@ class WalletDerive
         if( $params['includeroot'] ) {
             $ptpkha = new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash());
             $address = $ptpkha->getAddress();
-            if($coin == 'bch')
-            {
-                $bcashaddress = CashAddress::old2new($address);
-            }
+            $bcashaddress = strtolower($coin) == 'bch' ? CashAddress::old2new($address) : '';
+            
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
             $pubkey = $master->getPublicKey()->getHex();
             $xpub = $master->toExtendedPublicKey($network);
-
 
             $addrs[] = array( 'xprv' => $xprv,
                               'privkey' => $wif,
@@ -91,23 +88,10 @@ class WalletDerive
                               'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
-                              'bitcoincash' => '',
+                              'bitcoincash' => $bcashaddress,
                               'index' => null,
                               'path' => 'm');
 
-            if($coin == 'bch')
-            {
-                $addrs[] = array( 'xprv' => $xprv,
-                    'privkey' => $wif,
-                    'pubkey' => $pubkey,
-                    'pubkeyhash' => $pubkey,
-                    'xpub' => $xpub,
-                    'address' => $address,
-                    'bitcoincash' => $bcashaddress,
-                    'index' => null,
-                    'path' => 'm');
-
-            }
         }
 
 
@@ -128,11 +112,7 @@ class WalletDerive
                 $ptpkha = new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash());
 
                 $address = $ptpkha->getAddress();
-
-                if($coin == 'bch')
-                {
-                    $bcashaddress = CashAddress::old2new($address);
-                }
+                $bcashaddress = strtolower($coin) == 'bch' ? CashAddress::old2new($address) : '';
 
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
                 $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
@@ -150,23 +130,9 @@ class WalletDerive
                 'pubkeyhash' => $pubkeyhash,
                 'xpub' => $xpub,
                 'address' => $address,
-                'bitcoincash' => '',
+                'bitcoincash' => $bcashaddress,
                 'index' => $i,
                 'path' => $path);
-
-            if($coin == 'bch')
-            {
-                $addrs[] = array( 'xprv' => $xprv,
-                    'privkey' => $priv_wif,
-                    'pubkey' => $pubkey,
-                    'pubkeyhash' => $pubkeyhash,
-                    'xpub' => $xpub,
-                    'address' => $address,
-                    'bitcoincash' => $bcashaddress,
-                    'index' => $i,
-                    'path' => $path);
-
-            }
         }
 
         return $addrs;
