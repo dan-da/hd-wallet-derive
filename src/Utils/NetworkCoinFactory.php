@@ -28,7 +28,8 @@ class NetworkCoinFactory extends Network
                 }
                 $suffix = $net == 'main' ? '' : "-$net";
                 $symbol = $sym . $suffix;
-                $list[$symbol] = $info['name'];
+                $list[$symbol] = ['name' => $info['name'],
+                                  'bip44' => $info['prefixes']['bip44']];
             }
         }
         return $list;

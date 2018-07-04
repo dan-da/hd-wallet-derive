@@ -30,6 +30,7 @@ function main()
     try
     {
         // CLI Parameters processing
+        $orig_params = Util::getCliParams();
         list( $params, $success ) = Util::processCliParams();
         if( $success != 0 )
         {
@@ -50,6 +51,16 @@ function main()
         }
 
         // Key derived from mnemonic if mnemonic is choosen
+        if( !@$params['key'] && $params['mnemonic'] && !@$orig_params['path']) {
+            $path = $walletDerive->getCoinBip44ExtKeyPath($params['coin']);
+            if($path) {
+                $params['path'] = $path;
+                $walletDerive = new WalletDerive($params);
+            }
+            else {
+                throw new Exception(sprintf("Bip32 extended key path unknown because no Bip44 ID found for %s.  You can override by setting --path explicitly.", $params['coin']));
+            }
+        }
         $key = @$params['key'] ?: $walletDerive->mnemonicToKey($params['coin'], $params['mnemonic'], $params['mnemonic-pw']);
         $addrs = $walletDerive->derive_keys($key);
 

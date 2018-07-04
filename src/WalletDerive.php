@@ -15,6 +15,7 @@ use Exception;
 use App\Utils\NetworkCoinFactory;
 use App\Utils\MyLogger;
 use App\Utils\CashAddress;
+use coinParams\coinParams;
 
 
 /* A class that implements HD wallet key/address derivation
@@ -37,26 +38,26 @@ class WalletDerive
     private function get_params()
     {
         return $this->params;
-    }
-
+    }    
+    
     /* Derives child keys/addresses for a given key.
      */
     public function derive_keys($key)
     {
-
         $params = $this->get_params();
+        return $this->derive_keys_worker($params, $key);
+    }
 
+
+    private function derive_keys_worker($params, $key)
+    {
         $coin = $params['coin'];
         list($symbol) = explode('-', $coin);
-
         $addrs = array();
-
+        
         $networkCoinFactory = new NetworkCoinFactory();
-        $networkCoin = $networkCoinFactory->getNetworkCoinInstance($coin);
-
-        Bitcoin::setNetwork($networkCoin);
-
-        $network = Bitcoin::getNetwork();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);
 
         $master = $this->hkf->fromExtended($key, $network);
 
@@ -166,24 +167,51 @@ class WalletDerive
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
-        
+
+        // generate random mnemonic
         $random = new Random();
-        
         $bip39 = MnemonicFactory::bip39();
         $entropy = $random->bytes(64);
         $mnemonic = $bip39->entropyToMnemonic($entropy);
+        
+        // generate seed and master priv key from mnemonic
         $seedGenerator = new Bip39SeedGenerator();
         $seed = $seedGenerator->getSeed($mnemonic, '');
         $bip32 = $this->hkf->fromEntropy($seed);
+        $masterkey = $bip32->toExtendedPrivateKey($network);
+
+        // determine bip32 path for ext keys, which requires a bip44 ID for coin.
+        $bip32path = $this->getCoinBip44ExtKeyPath($coin);
+        if($bip32path) {
+            // derive extended priv/pub keys.
+            $ext_priv_key = $bip32->derivePath($bip32path)->toExtendedPrivateKey($network);
+            $ext_pub_key = $bip32->derivePath($bip32path)->toExtendedPublicKey($network);
+        }
         
         return [
             'coin' => $coin,
             'seed' => $seed->getHex(),
             'mnemonic' => $mnemonic,
-            'master_priv_key' => $bip32->toExtendedPrivateKey($network),
+            'master_priv_key' => $masterkey,
+            'path' => @$bip32path ?: 'bip44 ID missing',
+            'ext_priv_key' => @$ext_priv_key ?: 'bip44 ID missing',
+            'ext_pub_key' => @$ext_pub_key ?: 'bip44 ID missing',
         ];
     }
+    
+    public function getCoinBip44($coin) {
+        $map = coinParams::get_all_coins();
+        $normal = strstr($coin, '-') ? $coin : "$coin-main";
+        list($symbol, $net) = explode('-', $normal);
+        $bip44 = @$map[strtoupper($symbol)][$net]['prefixes']['bip44'];
+        return $bip44;
+    }
 
+    public function getCoinBip44ExtKeyPath($coin) {
+        $bip44 = $this->getCoinBip44($coin);
+        return is_int($bip44) ? sprintf("m/44'/%d'/0'/0", $bip44) : null;
+    }
+    
     public function genRandomKeyForAllNetworks() {
         $allcoins = NetworkCoinFactory::getNetworkCoinsList();
         $rows = [];

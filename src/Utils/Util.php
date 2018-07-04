@@ -178,6 +178,10 @@ class Util
     --path=<path>        bip32 path to derive, relative to provided key (m).
                            eg "", "m/0" or "m/1"
                            default = "m"
+                             if --mnemonic is used, then default is the
+                             bip44 path to extended key, eg m/44'/0'/0'/0
+                             which facilitates address derivation from
+                             mnemonic phrase.
                            
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
@@ -200,7 +204,8 @@ END;
         $data = [];
         foreach($allcoins as $k => $v) {
             $data[] = ['Symbol' => $k,
-                       'Coin / Network' => $v];
+                       'Coin / Network' => $v['name'],
+                       'Bip44' => $v['bip44']];
         }
         
         $summary = [];
