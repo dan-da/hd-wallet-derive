@@ -18,7 +18,7 @@ class WalletDeriveReport
     /* prints out single report in one of several possible formats,
      * or multiple reports, one for each possible format.
      */
-    static public function printResults($params, $results)
+    static public function printResults($params, $results, $fixedCols=false)
     {
         $format = $params['format'];
         $outfile = @$params['outfile'];
@@ -27,12 +27,15 @@ class WalletDeriveReport
 
         // remove columns not in report and change column order.
         $report_cols = $params['cols'];
+        
+        if(!$fixedCols) {
 
-        foreach( $results as &$r ) {
-            $tmp = $r;
-            $r = [];
-            foreach( $report_cols as $colname ) {
-                $r[$colname] = $tmp[$colname];
+            foreach( $results as &$r ) {
+                $tmp = $r;
+                $r = [];
+                foreach( $report_cols as $colname ) {
+                    $r[$colname] = $tmp[$colname];
+                }
             }
         }
 

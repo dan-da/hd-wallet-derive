@@ -30,6 +30,8 @@ class Util
             'format:', 'cols:',
             'logfile:', 'loglevel:',
             'list-cols',
+            'bch-format:',
+            'gen-key', 'gen-key-all',
             'version', 'help', 'helpcoins',
         );
 
@@ -96,9 +98,12 @@ class Util
             $params['path'] = 'm';
         }
 
+        $params['bch-format'] = @$params['bch-format'] ?: 'cash';
         $params['numderive'] = @$params['numderive'] ?: 10;
         $params['startindex'] = @$params['startindex'] ?: 0;
         $params['includeroot'] = isset($params['includeroot'] );
+        $params['gen-key'] = isset($params['gen-key']);
+        $params['gen-key-all'] = isset($params['gen-key-all']);  // hidden param, for the truly worthy who read the code.
 
         return [$params, $success];
     }
@@ -158,6 +163,9 @@ class Util
                          default:
                           ($defaultcols)
 
+    --bch-format=<fmt>   Bitcoin cash address format.
+                           legacy|cash   default=cash
+                           
     --outfile=<path>     specify output file path.
     --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
     
@@ -172,6 +180,7 @@ class Util
                            default = "m"
                            
     --includeroot       include root key as first element of report.
+    --gen-key           generates a new key.
     
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  $loglevels

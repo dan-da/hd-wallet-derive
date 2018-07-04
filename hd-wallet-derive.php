@@ -38,9 +38,19 @@ function main()
 
         // Creates WalletDerive object
         $walletDerive = new WalletDerive($params);
+        if($params['gen-key']) {
+            $result = $walletDerive->genRandomKeyForNetwork($params['coin']);
+            WalletDeriveReport::printResults($params, [$result], true);
+            return 0;
+        }
+        else if($params['gen-key-all']) {
+            $result = $walletDerive->genRandomKeyForAllNetworks();
+            WalletDeriveReport::printResults($params, $result, true);
+            return 0;
+        }
 
         // Key derived from mnemonic if mnemonic is choosen
-        $key = @$params['key'] ?: $walletDerive->mnemonicToKey($params['mnemonic'], $params['mnemonic-pw']);
+        $key = @$params['key'] ?: $walletDerive->mnemonicToKey($params['coin'], $params['mnemonic'], $params['mnemonic-pw']);
         $addrs = $walletDerive->derive_keys($key);
 
         // Prints result

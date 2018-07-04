@@ -8,13 +8,13 @@ require_once __DIR__  . '/../vendor/autoload.php';
 use BitWasp\Bitcoin\Bitcoin;
 use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
+use BitWasp\Bitcoin\Crypto\Random\Random;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
+use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 use Exception;
 use App\Utils\NetworkCoinFactory;
 use App\Utils\MyLogger;
 use App\Utils\CashAddress;
-
-// For Bip39 Mnemonics
-use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
 
 
 /* A class that implements HD wallet key/address derivation
@@ -47,6 +47,7 @@ class WalletDerive
         $params = $this->get_params();
 
         $coin = $params['coin'];
+        list($symbol) = explode('-', $coin);
 
         $addrs = array();
 
@@ -62,8 +63,6 @@ class WalletDerive
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
 
-        $bcashaddress = '';
-
         /*
          *  ROOT PATH INCLUSION
          *
@@ -75,7 +74,10 @@ class WalletDerive
         if( $params['includeroot'] ) {
             $ptpkha = new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash());
             $address = $ptpkha->getAddress();
-            $bcashaddress = strtolower($coin) == 'bch' ? CashAddress::old2new($address) : '';
+
+            if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
+                $address = CashAddress::old2new($address);
+            }
             
             $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
             $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
@@ -88,7 +90,6 @@ class WalletDerive
                               'pubkeyhash' => $pubkey,
                               'xpub' => $xpub,
                               'address' => $address,
-                              'bitcoincash' => $bcashaddress,
                               'index' => null,
                               'path' => 'm');
 
@@ -112,7 +113,9 @@ class WalletDerive
                 $ptpkha = new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash());
 
                 $address = $ptpkha->getAddress();
-                $bcashaddress = strtolower($coin) == 'bch' ? CashAddress::old2new($address) : '';
+                if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
+                    $address = CashAddress::old2new($address);
+                }
 
                 $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
                 $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
@@ -130,7 +133,6 @@ class WalletDerive
                 'pubkeyhash' => $pubkeyhash,
                 'xpub' => $xpub,
                 'address' => $address,
-                'bitcoincash' => $bcashaddress,
                 'index' => $i,
                 'path' => $path);
         }
@@ -139,8 +141,12 @@ class WalletDerive
     }
 
     // converts a bip39 mnemonic string with optional password to an xprv key (string).
-    public function mnemonicToKey($mnemonic, $password = null)
+    public function mnemonicToKey($coin, $mnemonic, $password = null)
     {
+        $networkCoinFactory = new NetworkCoinFactory();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);
+        
 //        $bip39 = MnemonicFactory::bip39();
         $seedGenerator = new Bip39SeedGenerator();
 
@@ -153,14 +159,46 @@ class WalletDerive
         // echo $seed->getHex() . "\n";
         
         $bip32 = $this->hkf->fromEntropy($seed);
-        return $bip32->toExtendedKey();
+        return $bip32->toExtendedKey($network);
+    }
+    
+    public function genRandomKeyForNetwork($coin) {
+        $networkCoinFactory = new NetworkCoinFactory();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);
+        
+        $random = new Random();
+        
+        $bip39 = MnemonicFactory::bip39();
+        $entropy = $random->bytes(64);
+        $mnemonic = $bip39->entropyToMnemonic($entropy);
+        $seedGenerator = new Bip39SeedGenerator();
+        $seed = $seedGenerator->getSeed($mnemonic, '');
+        $bip32 = $this->hkf->fromEntropy($seed);
+        
+        return [
+            'coin' => $coin,
+            'seed' => $seed->getHex(),
+            'mnemonic' => $mnemonic,
+            'master_priv_key' => $bip32->toExtendedPrivateKey($network),
+        ];
     }
 
+    public function genRandomKeyForAllNetworks() {
+        $allcoins = NetworkCoinFactory::getNetworkCoinsList();
+        $rows = [];
+        foreach($allcoins as $coin => $data) {
+            $rows[] = $this->genRandomKeyForNetwork($coin);
+        }
+        return $rows;
+    }
+    
+    
     /* Returns all columns available for reports
      */
     static public function all_cols()
     {
-        return ['path', 'address', 'bitcoincash', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
+        return ['path', 'address', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
     }
 
     /* Returns default reporting columns
