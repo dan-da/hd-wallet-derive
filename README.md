@@ -152,6 +152,7 @@ $ ./hd-wallet-derive.php --helpcoins
 +--------------------+------------------------------------+
 
 ```
+(340+ altcoins omitted for brevity)
 
 Note that testnet and regtest are supported for many coins.
 
@@ -168,6 +169,23 @@ coin: ZEC, net: main
 | m/1  | t1Tw6iqFY1g9dKeAqPDAncaUjha8cn9SZqX |
 | m/2  | t1VGTPzBSSYd27GF8p9rGKGdFuWekKRhug4 |
 +------+-------------------------------------+
+```
+
+## We can easily generate a new random master key, seed and extended keys for any coin.
+
+```
+$ ./hd-wallet-derive.php --coin=DOGE --gen-key --format=jsonpretty -g
+[
+    {
+        "coin": "DOGE",
+        "seed": "a3adc3e71ac05b3336422e6506d646e995f7bfcb960e6fca48dc13c93fae8ef3dc37a6013791ad1cfe7fe408de0e7676a9fe29b02413c79b988d54c74515d3db",
+        "mnemonic": "arch hover pen regret priority sugar thunder glimpse west diagram path sword divide spread anger vendor century roof agree know treat drastic allow blind advance oil iron gold skate absorb stem shiver can pear twin helmet loan satisfy fragile admit comfort mercy pelican pupil debate tornado rifle desert",
+        "master_priv_key": "dgpv51eADS3spNJh8eoSPqujdFPAhBZywAW6KQrR5TqM1Q5NMsrJmFP1hTXvfbUHLQFLmh4jVYZjXtJvKJVakn5YxT48mocEXu7yTNkCYN29cMV",
+        "path": "m\/44'\/3'\/0'\/0",
+        "ext_priv_key": "dgpv59SfnUBjPvKLfM453bkxJXHRfNvDQ3zAngt3fpKheqR846z9W1QYzoUz5ss4qtvLU7iBd93nw8ZXcXArpdLjuyudR2uUFH4KeV9Nes8eNeJ",
+        "ext_pub_key": "dgub8tKh8A7cx4yfxCiE5qNvRNq27wHrEB1t5HfFpvigSxU8cA6qumxKe6tdf7TkUPFBoj6C8eBxofiydXy5hGf471zWZkYiy4tQ6vWqRwETdGA"
+    }
+]
 ```
 
 
