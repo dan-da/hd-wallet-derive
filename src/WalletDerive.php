@@ -6,7 +6,7 @@ require_once __DIR__  . '/../vendor/autoload.php';
 
 // For HD-Wallet Key Derivation
 use BitWasp\Bitcoin\Bitcoin;
-use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 use BitWasp\Bitcoin\Crypto\Random\Random;
 use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
@@ -17,6 +17,13 @@ use App\Utils\MyLogger;
 use App\Utils\CashAddress;
 use coinParams\coinParams;
 
+// For ethereum addresses
+use kornrunner\Keccak;
+use BitWasp\Bitcoin\Crypto\EcAdapter\Key\PublicKeyInterface;
+use BitWasp\Bitcoin\Crypto\EcAdapter\Impl\PhpEcc\Serializer\Key\PublicKeySerializer;
+use BitWasp\Bitcoin\Crypto\EcAdapter\EcAdapterFactory;
+use Mdanter\Ecc\Serializer\Point\UncompressedPointSerializer;
+use Mdanter\Ecc\EccFactory;
 
 /* A class that implements HD wallet key/address derivation
  */
@@ -73,8 +80,10 @@ class WalletDerive
          *
          * */
         if( $params['includeroot'] ) {
-            $ptpkha = new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash());
-            $address = $ptpkha->getAddress();
+            
+            $address = strtolower($symbol) == 'eth' ?
+                $address = $this->getEthereumAddress($master->getPublicKey()) :
+                (new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash()))->getAddress();
 
             if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
                 $address = CashAddress::old2new($address);
@@ -110,10 +119,10 @@ class WalletDerive
             
 
             if(method_exists($key, 'getPublicKey')) {
-                // bip32 path
-                $ptpkha = new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash());
-
-                $address = $ptpkha->getAddress();
+                $address = strtolower($symbol) == 'eth' ?
+                    $address = $this->getEthereumAddress($key->getPublicKey()) :
+                    (new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash()))->getAddress();
+                
                 if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
                     $address = CashAddress::old2new($address);
                 }
@@ -219,6 +228,40 @@ class WalletDerive
             $rows[] = $this->genRandomKeyForNetwork($coin);
         }
         return $rows;
+    }
+
+    private function getEthereumAddress(PublicKeyInterface $publicKey){
+        static $pubkey_serializer = null;
+        static $point_serializer = null;
+        if(!$pubkey_serializer){
+            $adapter = EcAdapterFactory::getPhpEcc(Bitcoin::getMath(), Bitcoin::getGenerator());
+            $pubkey_serializer = new PublicKeySerializer($adapter);
+            $point_serializer = new UncompressedPointSerializer(EccFactory::getAdapter());
+        }
+
+        $pubKey = $pubkey_serializer->parse($publicKey->getBuffer());
+        $point = $pubKey->getPoint();
+        $upk = $point_serializer->serialize($point);
+        $upk = hex2bin(substr($upk, 2));
+
+        $keccak = Keccak::hash($upk, 256);
+        $eth_address_lower = strtolower(substr($keccak, -40));
+
+        $hash = Keccak::hash($eth_address_lower, 256);
+        $eth_address = '';
+        for($i = 0; $i < 40; $i++) {
+            // the nth letter should be uppercase if the nth digit of casemap is 1
+            $char = substr($eth_address_lower, $i, 1);
+
+            if(ctype_digit($char))
+                $eth_address .= $char;
+            else if('0' <= $hash[$i] && $hash[$i] <= '7')
+                $eth_address .= strtolower($char);
+            else 
+                $eth_address .= strtoupper($char);
+        }
+
+        return '0x'. $eth_address;
     }
     
     
