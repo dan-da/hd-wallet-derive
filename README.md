@@ -3,6 +3,7 @@
 A command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins.
 
 As of version 0.3.2, over 300 altcoins are available, 97 with bip44 path information.
+As of version 0.3.3, ethereum addresses are supported.
 
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
