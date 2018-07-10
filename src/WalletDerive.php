@@ -25,6 +25,17 @@ use BitWasp\Bitcoin\Crypto\EcAdapter\EcAdapterFactory;
 use Mdanter\Ecc\Serializer\Point\UncompressedPointSerializer;
 use Mdanter\Ecc\EccFactory;
 
+// For slip132
+use BitWasp\Bitcoin\Address\AddressCreator;
+use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\GlobalPrefixConfig;
+use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig;
+use BitWasp\Bitcoin\Key\Deterministic\Slip132\Slip132;
+use BitWasp\Bitcoin\Key\KeyToScript\KeyToScriptHelper;
+use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
+use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
+use App\Utils\MultiCoinRegistry;
+
+
 /* A class that implements HD wallet key/address derivation
  */
 class WalletDerive
@@ -66,43 +77,16 @@ class WalletDerive
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
 
-        $master = $this->hkf->fromExtended($key, $network);
+        $master = $this->fromExtended($key, $network);
 
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
 
         /*
          *  ROOT PATH INCLUSION
-         *
-         *
-         *
-         *
-         *
          * */
         if( $params['includeroot'] ) {
-            
-            $address = strtolower($symbol) == 'eth' ?
-                $address = $this->getEthereumAddress($master->getPublicKey()) :
-                (new PayToPubKeyHashAddress($master->getPublicKey()->getPubKeyHash()))->getAddress();
-
-            if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
-                $address = CashAddress::old2new($address);
-            }
-            
-            $xprv = $master->isPrivate() ? $master->toExtendedKey($network) : null;
-            $wif = $master->isPrivate() ? $master->getPrivateKey()->toWif($network) : null;
-            $pubkey = $master->getPublicKey()->getHex();
-            $xpub = $master->toExtendedPublicKey($network);
-
-            $addrs[] = array( 'xprv' => $xprv,
-                              'privkey' => $wif,
-                              'pubkey' => $pubkey,
-                              'pubkeyhash' => $pubkey,
-                              'xpub' => $xpub,
-                              'address' => $address,
-                              'index' => null,
-                              'path' => 'm');
-
+            $this->derive_key_worker($symbol, $network, $addrs, $master, null, 'm');
         }
 
 
@@ -117,37 +101,91 @@ class WalletDerive
             $path = $path_base . "/$i";
             $key = $master->derivePath($path);
             
-
-            if(method_exists($key, 'getPublicKey')) {
-                $address = strtolower($symbol) == 'eth' ?
-                    $address = $this->getEthereumAddress($key->getPublicKey()) :
-                    (new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash()))->getAddress();
-                
-                if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
-                    $address = CashAddress::old2new($address);
-                }
-
-                $xprv = $key->isPrivate() ? $key->toExtendedKey($network) : null;
-                $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
-                $pubkey = $key->getPublicKey()->getHex();
-                $pubkeyhash = $key->getPublicKey()->getPubKeyHash()->getHex();
-                $xpub = $key->toExtendedPublicKey($network);
-            }
-            else {
-                throw new Exception("multisig keys not supported");
-            }
-
-            $addrs[] = array( 'xprv' => $xprv,
-                'privkey' => $priv_wif,
-                'pubkey' => $pubkey,
-                'pubkeyhash' => $pubkeyhash,
-                'xpub' => $xpub,
-                'address' => $address,
-                'index' => $i,
-                'path' => $path);
+            $this->derive_key_worker($symbol, $network, $addrs, $key, $i, $path);
         }
 
         return $addrs;
+    }
+    
+    private function derive_key_worker($symbol, $network, &$addrs, $key, $index, $path) {
+        if(method_exists($key, 'getPublicKey')) {
+            $address = strtolower($symbol) == 'eth' ?
+                $address = $this->getEthereumAddress($key->getPublicKey()) :
+                           $this->address($key, $network);
+                // (new PayToPubKeyHashAddress($key->getPublicKey()->getPubKeyHash()))->getAddress();
+            
+            if(strtolower($symbol) == 'bch' && $params['bch-format'] != 'legacy') {
+                $address = CashAddress::old2new($address);
+            }
+
+            $xprv = $key->isPrivate() ? $this->toExtendedKey($key, $network) : null;
+            $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
+            $pubkey = $key->getPublicKey()->getHex();
+            $pubkeyhash = $key->getPublicKey()->getPubKeyHash()->getHex();
+            $xpub = $this->toExtendedKey($key->withoutPrivateKey(), $network);
+        }
+        else {
+            throw new Exception("multisig keys not supported");
+        }
+
+        $addrs[] = array( 'xprv' => $xprv,
+            'privkey' => $priv_wif,
+            'pubkey' => $pubkey,
+            'pubkeyhash' => $pubkeyhash,
+            'xpub' => $xpub,
+            'address' => $address,
+            'index' => $index,
+            'path' => $path);
+    }
+    
+    private function address($key, $network) {
+        $addrCreator = new AddressCreator();
+        return $key->getAddress($addrCreator)->getAddress($network);
+    }
+    
+    private function getKeyType() {
+        $params = $this->get_params();
+        return $params['key'][0];
+    }
+    
+    private function getSerializer($network) {
+        $params = $this->get_params();
+        $coin = strstr($params['coin'], '-') ? $params['coin'] : $params['coin'] . '-main';
+        list($symbol, $net) = explode('-', $coin);
+        $coinMeta = coinparams::get_coin_network($symbol, $net);
+        
+        $coinPrefixes = new MultiCoinRegistry($coinMeta);
+        $adapter = Bitcoin::getEcAdapter();
+
+        // If you want to produce different addresses,
+        // set a different prefix/factory here.
+        $slip132 = new Slip132(new KeyToScriptHelper($adapter));
+
+        $key_type = $this->getKeyType();
+        switch( $key_type ) {
+            case 'x': $prefix = $slip132->p2pkh($coinPrefixes); break;
+            case 'X': $prefix = $slip132->p2shP2pkh($coinPrefixes); break;  // also xpub.  this case won't work.
+            case 'y': $prefix = $slip132->p2shP2wpkh($coinPrefixes); break;
+            case 'Y': $prefix = $slip132->p2shP2wshP2pkh($coinPrefixes); break;
+            case 'z': $prefix = $slip132->p2wpkh($coinPrefixes); break;
+            case 'Z': $prefix = $slip132->p2wshP2pkh($coinPrefixes); break;
+            default:
+                throw new Exception("Unknown key type: $key_type");
+        }
+        $config = new GlobalPrefixConfig([new NetworkConfig($network, [$prefix]),]);
+
+        $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
+        return $serializer;
+    }
+    
+    private function toExtendedKey($key, $network) {
+        $serializer = $this->getSerializer($network);
+        return $serializer->serialize($network, $key);
+    }
+    
+    private function fromExtended($extendedKey, $network) {
+        $serializer = $this->getSerializer($network);
+        return $serializer->parse($network, $extendedKey);
     }
 
     // converts a bip39 mnemonic string with optional password to an xprv key (string).
