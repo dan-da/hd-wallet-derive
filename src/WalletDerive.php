@@ -148,20 +148,66 @@ class WalletDerive
         return $params['key'][0];
     }
     
-    private function getSerializer($network) {
+    private function getSerializer($network, $key_type=null) {
+        $adapter = Bitcoin::getEcAdapter();
+
+        $key_type = $key_type ?: $this->getKeyType();
+        
+        $prefix = $this->getScriptPrefixForKeyType($key_type);
+        $config = new GlobalPrefixConfig([new NetworkConfig($network, [$prefix]),]);
+
+        $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
+        return $serializer;
+    }
+    
+    // key_type is one of x,y,Y,z,Z
+    private function getScriptDataFactoryForKeyType($key_type) {
+        $helper = new KeyToScriptHelper(Bitcoin::getEcAdapter());
+        
+        // note: these calls are adapted from bitwasp slip132.php
+        switch( $key_type ) {
+            case 'x': $factory = $helper->getP2pkhFactory(); break;
+            case 'X': $factory = $helper->getP2shFactory($helper->getP2pkhFactory()); break;  // also xpub.  this case won't work.
+            case 'y': $factory = $helper->getP2shFactory($helper->getP2wpkhFactory()); break;
+            case 'Y': $factory = $helper->getP2shP2wshFactory($helper->getP2pkhFactory()); break;
+            case 'z': $factory = $helper->getP2wpkhFactory(); break;
+            case 'Z': $factory = $helper->getP2wshFactory($helper->getP2pkhFactory()); break;
+            default:
+                throw new Exception("Unknown key type: $key_type");
+        }
+        return $factory;        
+    }
+    
+    private function getSymbolAndNetwork($coin = null) {
+        if(!$coin) {
+            $params = $this->get_params();
+            $coin = $params['coin'];
+        }
+        $normalcoin = strstr($coin, '-') ? $coin : $coin . '-main';
+        return explode('-', $normalcoin);
+    }
+    
+    private function getNetworkParams($coin=null) {
+        list($symbol, $net) = $this->getSymbolAndNetwork($coin);
+        return coinparams::get_coin_network($symbol, $net);
+    }
+    
+    private function networkSupportsKeyType($network, $key_type, $coin=null) {
+        $nparams = $this->getNetworkParams($coin);
+        $mcr = new MultiCoinRegistry($nparams);  // todo: cache these objects.
+        return (bool)$mcr->prefixBytesByKeyType($key_type);        
+    }
+    
+    // key_type is one of x,y,Y,z,Z
+    private function getScriptPrefixForKeyType($key_type) {
         $params = $this->get_params();
         $coin = strstr($params['coin'], '-') ? $params['coin'] : $params['coin'] . '-main';
         list($symbol, $net) = explode('-', $coin);
-        $coinMeta = coinparams::get_coin_network($symbol, $net);
         
-        $coinPrefixes = new MultiCoinRegistry($coinMeta);
         $adapter = Bitcoin::getEcAdapter();
-
-        // If you want to produce different addresses,
-        // set a different prefix/factory here.
         $slip132 = new Slip132(new KeyToScriptHelper($adapter));
-
-        $key_type = $this->getKeyType();
+        $coinMeta = coinparams::get_coin_network($symbol, $net);
+        $coinPrefixes = new MultiCoinRegistry($coinMeta);
         switch( $key_type ) {
             case 'x': $prefix = $slip132->p2pkh($coinPrefixes); break;
             case 'X': $prefix = $slip132->p2shP2pkh($coinPrefixes); break;  // also xpub.  this case won't work.
@@ -172,14 +218,11 @@ class WalletDerive
             default:
                 throw new Exception("Unknown key type: $key_type");
         }
-        $config = new GlobalPrefixConfig([new NetworkConfig($network, [$prefix]),]);
-
-        $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
-        return $serializer;
+        return $prefix;
     }
     
-    private function toExtendedKey($key, $network) {
-        $serializer = $this->getSerializer($network);
+    private function toExtendedKey($key, $network, $key_type=null) {
+        $serializer = $this->getSerializer($network, $key_type);
         return $serializer->serialize($network, $key);
     }
     
@@ -188,6 +231,7 @@ class WalletDerive
         return $serializer->parse($network, $extendedKey);
     }
 
+    
     // converts a bip39 mnemonic string with optional password to an xprv key (string).
     public function mnemonicToKey($coin, $mnemonic, $password = null)
     {
@@ -210,7 +254,7 @@ class WalletDerive
         return $bip32->toExtendedKey($network);
     }
     
-    public function genRandomKeyForNetwork($coin) {
+    public function genRandomKeyForNetwork($coin, $flatlist=true) {
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
@@ -220,30 +264,66 @@ class WalletDerive
         $bip39 = MnemonicFactory::bip39();
         $entropy = $random->bytes(64);
         $mnemonic = $bip39->entropyToMnemonic($entropy);
-        
+
         // generate seed and master priv key from mnemonic
         $seedGenerator = new Bip39SeedGenerator();
-        $seed = $seedGenerator->getSeed($mnemonic, '');
-        $bip32 = $this->hkf->fromEntropy($seed);
-        $masterkey = $bip32->toExtendedPrivateKey($network);
+        $seed = $seedGenerator->getSeed($mnemonic, '');        
 
-        // determine bip32 path for ext keys, which requires a bip44 ID for coin.
-        $bip32path = $this->getCoinBip44ExtKeyPath($coin);
-        if($bip32path) {
-            // derive extended priv/pub keys.
-            $ext_priv_key = $bip32->derivePath($bip32path)->toExtendedPrivateKey($network);
-            $ext_pub_key = $bip32->derivePath($bip32path)->toExtendedPublicKey($network);
-        }
-        
-        return [
+        $data = [
             'coin' => $coin,
             'seed' => $seed->getHex(),
             'mnemonic' => $mnemonic,
-            'master_priv_key' => $masterkey,
-            'path' => @$bip32path ?: 'bip44 ID missing',
-            'ext_priv_key' => @$ext_priv_key ?: 'bip44 ID missing',
-            'ext_pub_key' => @$ext_pub_key ?: 'bip44 ID missing',
         ];
+        
+                    // type   purpose        
+        $key_types = ['x'  => 44,
+                      'y'  => 49,
+                      'Y'  => 49,
+                      'z'  => 84,
+                      'Z'  => 84,
+                     ];
+        $keys = [];
+        
+        $row = &$data;  // to accomodate flatlist format.
+        
+        foreach($key_types as $key_type => $purpose) {
+            if( !$this->networkSupportsKeyType($network, $key_type, $coin) ) {
+                $data[$key_type] = null;
+                continue;
+            }
+            $k = $key_type;
+            $pf = $flatlist ? $k . '-' : '';
+            if(!$flatlist) {
+                unset($row);
+                $row = [];
+            }
+            
+            $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);  // xpub
+            $xkey = $this->hkf->fromEntropy($seed, Bitcoin::getEcAdapter(), $scriptFactory);
+            $masterkey = $this->toExtendedKey($xkey, $network, $key_type);
+            $row[$pf . 'root-key'] = $masterkey;
+    
+            // determine bip32 path for ext keys, which requires a bip44 ID for coin.
+            $bip32path = $this->getCoinBip44ExtKeyPathPurpose($coin, $purpose);
+            if($bip32path) {
+                // derive extended priv/pub keys.
+                $prv = $xkey->derivePath($bip32path);
+                $pub = $prv->withoutPrivateKey();
+                $row[$pf . 'path'] = $bip32path;
+                $row[$k. 'prv'] = $this->toExtendedKey($prv, $network, $key_type);
+                $row[$k. 'pub'] = $this->toExtendedKey($pub, $network, $key_type);
+            }
+            else {
+                $row[$pf . 'path'] = null;
+                $row[$k. 'prv'] = null;
+                $row[$k. 'pub'] = null;
+                $row['warning'] = "Bip44 ID is missing for this coin";
+            }
+            if(!$flatlist) {
+                $data[$key_type] = $row;
+            }
+        }
+        return $data;
     }
     
     public function getCoinBip44($coin) {
@@ -258,6 +338,12 @@ class WalletDerive
         $bip44 = $this->getCoinBip44($coin);
         return is_int($bip44) ? sprintf("m/44'/%d'/0'/0", $bip44) : null;
     }
+
+    public function getCoinBip44ExtKeyPathPurpose($coin, $purpose) {
+        $bip44 = $this->getCoinBip44($coin);
+        return is_int($bip44) ? sprintf("m/%s'/%d'/0'/0", $purpose, $bip44) : null;
+    }
+
     
     public function genRandomKeyForAllNetworks() {
         $allcoins = NetworkCoinFactory::getNetworkCoinsList();

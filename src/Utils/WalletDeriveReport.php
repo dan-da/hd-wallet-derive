@@ -89,7 +89,7 @@ class WalletDeriveReport
     /* writes out results in jsonpretty format
      */
     static public function write_results_jsonpretty( $fh, $results ) {
-        fwrite( $fh, json_encode( $results,  JSON_PRETTY_PRINT ) );
+        fwrite( $fh, json_encode( $results,  JSON_PRETTY_PRINT ) . "\n" );
     }
 
     /* writes out results in csv format

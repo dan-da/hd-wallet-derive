@@ -7,6 +7,8 @@ use BitWasp\Bitcoin\Script\ScriptType;
 
 class MultiCoinRegistry extends PrefixRegistry
 {
+    private $key_type_map;
+    
     public function __construct($coinmeta)
     {
         $map = [];
@@ -19,15 +21,25 @@ class MultiCoinRegistry extends PrefixRegistry
         
         $st = [
             'x'  => [ScriptType::P2PKH],
-            'x-p2sh' => [ScriptType::P2SH, ScriptType::P2PKH],
+            'X'  => [ScriptType::P2SH, ScriptType::P2PKH],   // p2pkh in p2sh (typically multisig).  normally in xpub instead.
             'y'  => [ScriptType::P2SH, ScriptType::P2WKH],
             'Y'  => [ScriptType::P2SH, ScriptType::P2WSH, ScriptType::P2PKH],
             'z'  => [ScriptType::P2WKH],
             'Z'  => [ScriptType::P2WSH, ScriptType::P2PKH],
         ];
         
+        // to indicate if each prefix is supported by this network or not.
+        $this->key_type_map = [
+            'x'  => $x,
+            'X'  => $x,   // p2pkh in p2sh (typically multisig).  normally in xpub instead.
+            'y'  => $y,
+            'Y'  => $Y,
+            'z'  => $z,
+            'Z'  => $Z,
+        ];
+        
         $t[] = $x ? [ [$x['private'],$x['public']], $st['x'] ] : null;
-        $t[] = $x ? [ [$x['private'],$x['public']], $st['x-p2sh'] ] : null;
+        $t[] = $x ? [ [$x['private'],$x['public']], $st['X'] ] : null;
         $t[] = $y ? [ [$y['private'],$y['public']], $st['y'] ] : null;
         $t[] = $Y ? [ [$Y['private'],$Y['public']], $st['Y'] ] : null;
         $t[] = $z ? [ [$z['private'],$z['public']], $st['z'] ] : null;
@@ -46,5 +58,9 @@ class MultiCoinRegistry extends PrefixRegistry
             $map[$type] = $prefixList;
         }
         parent::__construct($map);
+    }
+    
+    public function prefixBytesByKeyType($key_type) {
+        return @$this->key_type_map[$key_type];
     }
 }
