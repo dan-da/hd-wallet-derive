@@ -167,7 +167,7 @@ class Util
                            legacy|cash   default=cash
                            
     --outfile=<path>     specify output file path.
-    --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
+    --format=<format>    txt|md|csv|json|jsonpretty|html|list|all   default=txt
     
                          if 'all' is specified then a file will be created
                          for each format with appropriate extension.

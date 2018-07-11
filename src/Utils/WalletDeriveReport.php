@@ -9,6 +9,7 @@
 namespace App\Utils;
 
 use texttable;
+use texttable_markdown;
 
 /* A class that generates wallet-discovery reports in various formats.
  */
@@ -40,7 +41,7 @@ class WalletDeriveReport
         }
 
         if( $outfile && $format == 'all' ) {
-            $formats = array( 'txt', 'csv', 'json', 'jsonpretty', 'html', 'list' );
+            $formats = array( 'txt', 'md', 'csv', 'json', 'jsonpretty', 'html', 'list' );
 
             foreach( $formats as $format ) {
 
@@ -66,6 +67,7 @@ class WalletDeriveReport
 
         switch( $format ) {
             case 'txt':        self::write_results_fixed_width( $fh, $results, $summary ); break;
+            case 'md':         self::write_results_markdown( $fh, $results, $summary ); break;
             case 'list':       self::write_results_list( $fh, $results, $summary );    break;
             case 'csv':        self::write_results_csv( $fh, $results );         break;
             case 'json':       self::write_results_json( $fh, $results );        break;
@@ -146,6 +148,17 @@ class WalletDeriveReport
         fwrite( $fh, "\n" );
     }
 
+    /* writes out results as a markdown table.
+     */
+    static protected function write_results_markdown( $fh, $results, $summary ) {
+
+        $buf = texttable_markdown::table( $results );
+        fwrite( $fh, $buf );
+
+        fwrite( $fh, "\n" );
+    }
+    
+    
     /* writes out results as a plain text list of addresses. single column only.
      */
     static protected function write_results_list( $fh, $results, $summary ) {
