@@ -45,9 +45,8 @@ function main()
             return 0;
         }
         if($params['gen-key']) {
-            $flatlist = !(bool)strstr($params['format'], 'json');
-            $result = $walletDerive->genRandomKeyForNetwork($params['coin'], $flatlist);
-            WalletDeriveReport::printResults($params, [$result], true);
+            $result = $walletDerive->genRandomKeyForNetwork($params['coin']);
+            WalletDeriveReport::printResults($params, $result);
             return 0;
         }
 

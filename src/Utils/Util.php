@@ -219,13 +219,13 @@ END;
     {
         $arg = static::stripWhitespace( @$params['cols'] ?: null );
 
-        $allcols = WalletDerive::all_cols();
+        $allcols = isset($params['gen-key']) ? WalletDerive::all_cols_genkey() : WalletDerive::all_cols();
 
         if( $arg == 'all' ) {
             $cols = $allcols;
         }
         else if( !$arg ) {
-            $cols = WalletDerive::default_cols();
+            $cols = isset($params['gen-key']) ? WalletDerive::default_cols_genkey() : WalletDerive::default_cols();
         }
         else {
             $cols = explode( ',', $arg );

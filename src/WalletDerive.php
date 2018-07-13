@@ -254,7 +254,7 @@ class WalletDerive
         return $bip32->toExtendedKey($network);
     }
     
-    public function genRandomKeyForNetwork($coin, $flatlist=true) {
+    public function genRandomKeyForNetwork($coin) {
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
@@ -278,25 +278,22 @@ class WalletDerive
                     // type   purpose        
         $key_types = ['x'  => 44,
                       'y'  => 49,
-                      'Y'  => 49,
                       'z'  => 84,
-                      'Z'  => 84,
+//                      'Y'  => ??,    // multisig
+//                      'Z'  => ??,    // multisig
                      ];
         $keys = [];
         
-        $row = &$data;  // to accomodate flatlist format.
-        
+        $rows = [];
         foreach($key_types as $key_type => $purpose) {
             if( !$this->networkSupportsKeyType($network, $key_type, $coin) ) {
-                $data[$key_type] = null;
+                // $data[$key_type] = null;
                 continue;
             }
+            $row = $data;
+            
             $k = $key_type;
-            $pf = $flatlist ? $k . '-' : '';
-            if(!$flatlist) {
-                unset($row);
-                $row = [];
-            }
+            $pf = '';
             
             $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);  // xpub
             $xkey = $this->hkf->fromEntropy($seed, Bitcoin::getEcAdapter(), $scriptFactory);
@@ -310,20 +307,18 @@ class WalletDerive
                 $prv = $xkey->derivePath($bip32path);
                 $pub = $prv->withoutPrivateKey();
                 $row[$pf . 'path'] = $bip32path;
-                $row[$k. 'prv'] = $this->toExtendedKey($prv, $network, $key_type);
-                $row[$k. 'pub'] = $this->toExtendedKey($pub, $network, $key_type);
+                $row['xprv'] = $this->toExtendedKey($prv, $network, $key_type);
+                $row['xpub'] = $this->toExtendedKey($pub, $network, $key_type);
             }
             else {
                 $row[$pf . 'path'] = null;
-                $row[$k. 'prv'] = null;
-                $row[$k. 'pub'] = null;
+                $row['xprv'] = null;
+                $row['xpub'] = null;
                 $row['warning'] = "Bip44 ID is missing for this coin";
             }
-            if(!$flatlist) {
-                $data[$key_type] = $row;
-            }
+            $rows[] = $row;
         }
-        return $data;
+        return $rows;
     }
     
     public function getCoinBip44($coin) {
@@ -396,12 +391,28 @@ class WalletDerive
         return ['path', 'address', 'xprv', 'xpub', 'privkey', 'pubkey', 'pubkeyhash', 'index'];
     }
 
+    /* Returns all columns available for reports when using --gen-key
+     */
+    static public function all_cols_genkey()
+    {
+        return ['coin', 'seed', 'mnemonic', 'root-key', 'path', 'xprv', 'xpub'];
+    }
+    
+    
     /* Returns default reporting columns
      */
     static public function default_cols()
     {
         return ['path', 'address', 'privkey'];
     }
+    
+    /* Returns default reporting columns when using --gen-key
+     */
+    static public function default_cols_genkey()
+    {
+        return ['coin', 'seed', 'mnemonic', 'root-key', 'path', 'xprv', 'xpub'];
+    }
+    
 }
 
 // examples
