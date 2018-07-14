@@ -23,6 +23,7 @@ class Util
             'coin:',
             'mnemonic:',
             'mnemonic-pw:',
+            'key-type:',
             'outfile:',
             'numderive:', 'startindex:',
             'includeroot',
@@ -89,6 +90,13 @@ class Util
         }
         $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
 
+        $keytype = @$params['key-type'] ?: 'x';
+        $keytypes = ['x', 'y', 'z'];  // , 'Y', 'Z'];
+        if(!in_array($keytype, $keytypes ) ) {
+            throw new Exception( "--key-type must be one of: " . implode(',', $keytypes ));
+        }
+        $params['key-type'] = $keytype;
+        
         if( @$params['path'] && !is_numeric($params['path']) && $params['path']{0} != 'm' ) {
             throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
         }
@@ -146,6 +154,9 @@ class Util
                            note: either key or nmemonic is required.
                            
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
+    
+    --key-type           x | y | z
+                            applies to --mnemonic only.
 
     --coin=<coin>        Coin Symbol ( default = btc )
                          See --helpcoins for a list.

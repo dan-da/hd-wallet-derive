@@ -145,7 +145,7 @@ class WalletDerive
     
     private function getKeyType() {
         $params = $this->get_params();
-        return $params['key'][0];
+        return @$params['key'][0] ?: $params['key-type'];
     }
     
     private function getSerializer($network, $key_type=null) {
@@ -226,14 +226,14 @@ class WalletDerive
         return $serializer->serialize($network, $key);
     }
     
-    private function fromExtended($extendedKey, $network) {
-        $serializer = $this->getSerializer($network);
+    private function fromExtended($extendedKey, $network, $key_type=null) {
+        $serializer = $this->getSerializer($network, $key_type);
         return $serializer->parse($network, $extendedKey);
     }
 
     
     // converts a bip39 mnemonic string with optional password to an xprv key (string).
-    public function mnemonicToKey($coin, $mnemonic, $password = null)
+    public function mnemonicToKey($coin, $mnemonic, $key_type, $password = null)
     {
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
@@ -250,11 +250,14 @@ class WalletDerive
         // mylogger()->log( "Seed: " . $seed->getHex(), mylogger::info );
         // echo $seed->getHex() . "\n";
         
-        $bip32 = $this->hkf->fromEntropy($seed);
-        return $bip32->toExtendedKey($network);
+        $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);
+
+        $bip32 = HierarchicalKeyFactory::fromEntropy($seed, $ecAdapter = null, $scriptFactory);
+//        $bip32 = $this->hkf->fromEntropy($seed);
+        return $this->toExtendedKey($bip32, $network, $key_type );
     }
     
-    public function genRandomKeyForNetwork($coin) {
+    public function genRandomKeyForNetwork($coin, $flatlist=true) {
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
@@ -333,12 +336,26 @@ class WalletDerive
         $bip44 = $this->getCoinBip44($coin);
         return is_int($bip44) ? sprintf("m/44'/%d'/0'/0", $bip44) : null;
     }
-
+    
     public function getCoinBip44ExtKeyPathPurpose($coin, $purpose) {
         $bip44 = $this->getCoinBip44($coin);
         return is_int($bip44) ? sprintf("m/%s'/%d'/0'/0", $purpose, $bip44) : null;
     }
+    
+    public function getBip32PurposeByKeyType($key_type) {
+        $map = ['x' => 44,
+                'y' => 49,
+                'z' => 84,
+                'Y' => 141,
+                'Z' => 141,
+               ];
+        return $map[$key_type];
+    }
 
+    public function getCoinBip44ExtKeyPathPurposeByKeyType($coin, $key_type) {
+        $purpose = $this->getBip32PurposeByKeyType($key_type);
+        return $this->getCoinBip44ExtKeyPathPurpose($coin, $purpose);
+    }    
     
     public function genRandomKeyForAllNetworks() {
         $allcoins = NetworkCoinFactory::getNetworkCoinsList();
