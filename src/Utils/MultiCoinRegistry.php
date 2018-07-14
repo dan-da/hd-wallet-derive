@@ -38,12 +38,12 @@ class MultiCoinRegistry extends PrefixRegistry
             'Z'  => $Z,
         ];
         
-        $t[] = $x ? [ [$x['private'],$x['public']], $st['x'] ] : null;
-        $t[] = $x ? [ [$x['private'],$x['public']], $st['X'] ] : null;
-        $t[] = $y ? [ [$y['private'],$y['public']], $st['y'] ] : null;
-        $t[] = $Y ? [ [$Y['private'],$Y['public']], $st['Y'] ] : null;
-        $t[] = $z ? [ [$z['private'],$z['public']], $st['z'] ] : null;
-        $t[] = $Z ? [ [$Z['private'],$Z['public']], $st['Z'] ] : null;
+        $t[] = $this->v($x) ? [ [$x['private'],$x['public']], $st['x'] ] : null;
+        $t[] = $this->v($x) ? [ [$x['private'],$x['public']], $st['X'] ] : null;
+        $t[] = $this->v($y) ? [ [$y['private'],$y['public']], $st['y'] ] : null;
+        $t[] = $this->v($Y) ? [ [$Y['private'],$Y['public']], $st['Y'] ] : null;
+        $t[] = $this->v($z) ? [ [$z['private'],$z['public']], $st['z'] ] : null;
+        $t[] = $this->v($Z) ? [ [$Z['private'],$Z['public']], $st['Z'] ] : null;
         
         foreach ($t as $row) {
             if(!$row) {
@@ -58,6 +58,10 @@ class MultiCoinRegistry extends PrefixRegistry
             $map[$type] = $prefixList;
         }
         parent::__construct($map);
+    }
+    
+    private function v($kt) {
+        return @$kt['private'] && $kt['public']; 
     }
     
     public function prefixBytesByKeyType($key_type) {
