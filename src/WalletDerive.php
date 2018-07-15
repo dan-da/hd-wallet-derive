@@ -35,6 +35,12 @@ use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
 use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
 use App\Utils\MultiCoinRegistry;
 
+// For determining key type via Base58 encode/decode
+use BitWasp\Buffertools\Buffer;
+use BitWasp\Buffertools\Parser;
+use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\RawExtendedKeySerializer;
+use BitWasp\Bitcoin\Base58;
+
 
 /* A class that implements HD wallet key/address derivation
  */
@@ -76,8 +82,10 @@ class WalletDerive
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
+        
+        $key_type = $this->getKeyTypeFromCoinAndKey($coin, $key);
 
-        $master = $this->fromExtended($key, $network);
+        $master = $this->fromExtended($coin, $key, $network, $key_type);
 
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
@@ -88,7 +96,6 @@ class WalletDerive
         if( $params['includeroot'] ) {
             $this->derive_key_worker($symbol, $network, $addrs, $master, null, 'm');
         }
-
 
         MyLogger::getInstance()->log( "Generating addresses", MyLogger::info );
         $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
@@ -101,13 +108,14 @@ class WalletDerive
             $path = $path_base . "/$i";
             $key = $master->derivePath($path);
             
-            $this->derive_key_worker($symbol, $network, $addrs, $key, $i, $path);
+            $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i, $path);
         }
 
         return $addrs;
     }
     
-    private function derive_key_worker($symbol, $network, &$addrs, $key, $index, $path) {
+    private function derive_key_worker($coin, $symbol, $network, &$addrs, $key, $key_type, $index, $path) {
+        $params = $this->get_params();
         if(method_exists($key, 'getPublicKey')) {
             $address = strtolower($symbol) == 'eth' ?
                 $address = $this->getEthereumAddress($key->getPublicKey()) :
@@ -118,11 +126,11 @@ class WalletDerive
                 $address = CashAddress::old2new($address);
             }
 
-            $xprv = $key->isPrivate() ? $this->toExtendedKey($key, $network) : null;
+            $xprv = $key->isPrivate() ? $this->toExtendedKey($coin, $key, $network, $key_type) : null;
             $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
             $pubkey = $key->getPublicKey()->getHex();
             $pubkeyhash = $key->getPublicKey()->getPubKeyHash()->getHex();
-            $xpub = $this->toExtendedKey($key->withoutPrivateKey(), $network);
+            $xpub = $this->toExtendedKey($coin, $key->withoutPrivateKey(), $network, $key_type);
         }
         else {
             throw new Exception("multisig keys not supported");
@@ -142,20 +150,46 @@ class WalletDerive
         $addrCreator = new AddressCreator();
         return $key->getAddress($addrCreator)->getAddress($network);
     }
-    
-    private function getKeyType() {
+
+    /*
+     * Determines key type (x,y,Y,z,Z) based on coin/network and a key.
+     */
+    private function getKeyTypeFromCoinAndKey($coin, $key) {
+        $nparams = $this->getNetworkParams($coin);
+        $prefix = substr($key, 0, 4);
+
+        // Parse the key to obtain prefix bytes.
+        $s = new RawExtendedKeySerializer(Bitcoin::getEcAdapter());
+        $rkp = $s->fromParser(new Parser(Base58::decodeCheck($key)));
+        $key_prefix = '0x' . $rkp->getPrefix();
+
+        // Get slip132 values if available. Else use bip32 xpub values.
+        // slip132 is considered a superset because it defines ypub, zpub, etc.
+        $slip132 = @$nparams['prefixes']['slip132'];
+        if(!$slip132) {
+            $slip132 = ['xpub' => $nparams['prefixes']['bip32'] ];
+        }
+        foreach($slip132 as $kt => $info) {
+            if( $key_prefix  == strtolower($info['public']) ) {
+                return $kt[0];
+            }
+            if( $key_prefix == strtolower($info['private']) ) {
+                return $kt[0];
+            }
+        }
+        throw new Exception("Keytype not found for $coin/$prefix");
+    }
+
+    private function getKeyTypeFromParams() {
         $params = $this->get_params();
-        return @$params['key'][0] ?: $params['key-type'];
+        return $params['key-type'];
     }
     
-    private function getSerializer($network, $key_type=null) {
+    private function getSerializer($coin, $network, $key_type) {
         $adapter = Bitcoin::getEcAdapter();
 
-        $key_type = $key_type ?: $this->getKeyType();
-        
-        $prefix = $this->getScriptPrefixForKeyType($key_type);
+        $prefix = $this->getScriptPrefixForKeyType($coin, $key_type);
         $config = new GlobalPrefixConfig([new NetworkConfig($network, [$prefix]),]);
-
         $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
         return $serializer;
     }
@@ -183,8 +217,7 @@ class WalletDerive
             $params = $this->get_params();
             $coin = $params['coin'];
         }
-        $normalcoin = strstr($coin, '-') ? $coin : $coin . '-main';
-        return explode('-', $normalcoin);
+        return explode('-', $this->coinToChain($coin));
     }
     
     private function getNetworkParams($coin=null) {
@@ -199,10 +232,8 @@ class WalletDerive
     }
     
     // key_type is one of x,y,Y,z,Z
-    private function getScriptPrefixForKeyType($key_type) {
-        $params = $this->get_params();
-        $coin = strstr($params['coin'], '-') ? $params['coin'] : $params['coin'] . '-main';
-        list($symbol, $net) = explode('-', $coin);
+    private function getScriptPrefixForKeyType($coin, $key_type) {
+        list($symbol, $net) = $this->getSymbolAndNetwork($coin);
         
         $adapter = Bitcoin::getEcAdapter();
         $slip132 = new Slip132(new KeyToScriptHelper($adapter));
@@ -221,47 +252,36 @@ class WalletDerive
         return $prefix;
     }
     
-    private function toExtendedKey($key, $network, $key_type=null) {
-        $serializer = $this->getSerializer($network, $key_type);
+    private function toExtendedKey($coin, $key, $network, $key_type) {
+        $serializer = $this->getSerializer($coin, $network, $key_type);
         return $serializer->serialize($network, $key);
     }
     
-    private function fromExtended($extendedKey, $network, $key_type=null) {
-        $serializer = $this->getSerializer($network, $key_type);
+    private function fromExtended($coin, $extendedKey, $network, $key_type) {
+        $serializer = $this->getSerializer($coin, $network, $key_type);
         return $serializer->parse($network, $extendedKey);
     }
-
     
     // converts a bip39 mnemonic string with optional password to an xprv key (string).
-    public function mnemonicToKey($coin, $mnemonic, $key_type, $password = null)
+    public function mnemonicToKey($coin, $mnemonic, $key_type, $password = '')
     {
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
         
-//        $bip39 = MnemonicFactory::bip39();
         $seedGenerator = new Bip39SeedGenerator();
 
         // Derive a seed from mnemonic/password
         $password = $password === null ? '' : $password;
         $seed = $seedGenerator->getSeed($mnemonic, $password);
         
-        // not logging seed.  just in case somebody keeps logs in insecure location.
-        // mylogger()->log( "Seed: " . $seed->getHex(), mylogger::info );
-        // echo $seed->getHex() . "\n";
-        
         $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);
 
         $bip32 = HierarchicalKeyFactory::fromEntropy($seed, $ecAdapter = null, $scriptFactory);
-//        $bip32 = $this->hkf->fromEntropy($seed);
-        return $this->toExtendedKey($bip32, $network, $key_type );
+        return $this->toExtendedKey($coin, $bip32, $network, $key_type );
     }
     
-    public function genRandomKeyForNetwork($coin, $flatlist=true) {
-        $networkCoinFactory = new NetworkCoinFactory();
-        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
-        Bitcoin::setNetwork($network);
-
+    protected function genRandomSeed($password=null) {
         // generate random mnemonic
         $random = new Random();
         $bip39 = MnemonicFactory::bip39();
@@ -270,13 +290,21 @@ class WalletDerive
 
         // generate seed and master priv key from mnemonic
         $seedGenerator = new Bip39SeedGenerator();
-        $seed = $seedGenerator->getSeed($mnemonic, '');        
+        $pw = $password == null ? '' : $password;
+        $seed = $seedGenerator->getSeed($mnemonic, $pw);
 
         $data = [
-            'coin' => $coin,
-            'seed' => $seed->getHex(),
+            'seed' => $seed,
             'mnemonic' => $mnemonic,
         ];
+        
+        return $data;
+    }
+        
+    protected function genKeysFromSeed($coin, $seedinfo) {
+        $networkCoinFactory = new NetworkCoinFactory();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);        
         
                     // type   purpose        
         $key_types = ['x'  => 44,
@@ -293,14 +321,18 @@ class WalletDerive
                 // $data[$key_type] = null;
                 continue;
             }
-            $row = $data;
+            $row = ['coin' => $coin,
+                    'seed' => $seedinfo['seed']->getHex(),
+                    'mnemonic' => $seedinfo['mnemonic']
+                   ];
             
             $k = $key_type;
             $pf = '';
             
             $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);  // xpub
-            $xkey = $this->hkf->fromEntropy($seed, Bitcoin::getEcAdapter(), $scriptFactory);
-            $masterkey = $this->toExtendedKey($xkey, $network, $key_type);
+
+            $xkey = HierarchicalKeyFactory::fromEntropy($seedinfo['seed'], Bitcoin::getEcAdapter(), $scriptFactory);
+            $masterkey = $this->toExtendedKey($coin, $xkey, $network, $key_type);
             $row[$pf . 'root-key'] = $masterkey;
     
             // determine bip32 path for ext keys, which requires a bip44 ID for coin.
@@ -310,8 +342,8 @@ class WalletDerive
                 $prv = $xkey->derivePath($bip32path);
                 $pub = $prv->withoutPrivateKey();
                 $row[$pf . 'path'] = $bip32path;
-                $row['xprv'] = $this->toExtendedKey($prv, $network, $key_type);
-                $row['xpub'] = $this->toExtendedKey($pub, $network, $key_type);
+                $row['xprv'] = $this->toExtendedKey($coin, $prv, $network, $key_type);
+                $row['xpub'] = $this->toExtendedKey($coin, $pub, $network, $key_type);
             }
             else {
                 $row[$pf . 'path'] = null;
@@ -324,10 +356,32 @@ class WalletDerive
         return $rows;
     }
     
+    public function genRandomKeyForNetwork($coin) {
+        $seedinfo = $this->genRandomSeed();
+        return $this->genKeysFromSeed($coin, $seedinfo);
+    }
+    
+    public function genRandomKeyForAllChains() {
+        $seedinfo = $this->genRandomSeed();
+        
+        $allcoins = NetworkCoinFactory::getNetworkCoinsList();
+        $rows = [];
+        echo "Deriving keys... ";
+        foreach($allcoins as $coin => $data) {
+            echo "$coin, ";
+            $rows = array_merge( $rows, $this->genKeysFromSeed($coin, $seedinfo));
+        }
+        echo "\n\n";
+        return $rows;
+    }
+    
+    public function coinToChain($coin) {
+        return strstr($coin, '-') ? $coin : "$coin-main";
+    }
+    
     public function getCoinBip44($coin) {
         $map = coinParams::get_all_coins();
-        $normal = strstr($coin, '-') ? $coin : "$coin-main";
-        list($symbol, $net) = explode('-', $normal);
+        list($symbol, $net) = explode('-', $this->coinToChain($coin));
         $bip44 = @$map[strtoupper($symbol)][$net]['prefixes']['bip44'];
         return $bip44;
     }
@@ -357,15 +411,6 @@ class WalletDerive
         return $this->getCoinBip44ExtKeyPathPurpose($coin, $purpose);
     }    
     
-    public function genRandomKeyForAllNetworks() {
-        $allcoins = NetworkCoinFactory::getNetworkCoinsList();
-        $rows = [];
-        foreach($allcoins as $coin => $data) {
-            $rows[] = $this->genRandomKeyForNetwork($coin);
-        }
-        return $rows;
-    }
-
     private function getEthereumAddress(PublicKeyInterface $publicKey){
         static $pubkey_serializer = null;
         static $point_serializer = null;

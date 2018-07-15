@@ -40,7 +40,7 @@ function main()
         // Creates WalletDerive object
         $walletDerive = new WalletDerive($params);
         if($params['gen-key-all']) {
-            $result = $walletDerive->genRandomKeyForAllNetworks();
+            $result = $walletDerive->genRandomKeyForAllChains();
             WalletDeriveReport::printResults($params, $result, true);
             return 0;
         }
@@ -81,4 +81,4 @@ function main()
     }
 }
 
-main();
+exit(main());
