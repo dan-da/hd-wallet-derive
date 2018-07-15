@@ -94,7 +94,7 @@
 
 namespace App\Utils;
 
-use BitWasp\Bitcoin\Bech32;
+use BitWasp\Bech32;
 
 
 
@@ -202,7 +202,7 @@ class CashAddress
 
         $inLen = sizeof($data);
 
-		$payloadConverted = Bech32::convertBits($data, $inLen, 8,5, true);
+		$payloadConverted = Bech32\convertBits($data, $inLen, 8,5, true);
 		if ($realNet) {
 			$arr = array_merge(self::getExpandPrefix(), $payloadConverted, [0, 0, 0, 0, 0, 0, 0, 0]);
 			$ret = "bitcoincash:";
@@ -211,7 +211,7 @@ class CashAddress
 			$ret = "bchtest:";
 		}
 
-		$mod          = Bech32::polymod($arr, sizeof($arr));
+		$mod          = Bech32\polyMod($arr, sizeof($arr));
 		$checksum     = [0, 0, 0, 0, 0, 0, 0, 0];
 		for ($i = 0; $i < 8; $i++)
 		{
