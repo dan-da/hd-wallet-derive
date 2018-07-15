@@ -12,6 +12,7 @@ class FlexNetwork extends Network {
     protected $bip32PrefixMap;
     protected $bip32ScriptTypeMap;
     protected $signedMessagePrefix;
+    protected $bech32PrefixMap;
     protected $p2pMagic;
     
     function __construct($coin) {
@@ -26,6 +27,10 @@ class FlexNetwork extends Network {
             self::BASE58_ADDRESS_P2PKH => self::dh(@$params['prefixes']['public']),
             self::BASE58_ADDRESS_P2SH => self::dh(@$params['prefixes']['scripthash']),
             self::BASE58_WIF => self::dh(@$params['prefixes']['private']),
+        ];
+        
+        $this->bech32PrefixMap = [
+            self::BECH32_PREFIX_SEGWIT => @$params['prefixes']['bech32'],
         ];
         
         $this->bip32PrefixMap = [
