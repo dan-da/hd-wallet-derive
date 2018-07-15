@@ -10,7 +10,9 @@ use tester;
 abstract class tests_common extends tester\test_base {
     
     protected function derive_params($params) {
-        return $this->exec_json($this->gen_args($params));
+        return !@$params['format'] || in_array($params['format'], ['json', 'jsonpretty']) ?
+            $this->exec_json($this->gen_args($params)) :
+            $this->exec($this->gen_args($params));
     }
     
     protected function gen_args($params, $defaults=true) {
@@ -45,8 +47,14 @@ abstract class tests_common extends tester\test_base {
 
         exec($cmd, $output, $rc);
         if($rc != 0) {
-            throw new \Exception("command failed with exit code " . $e->getCode() . "\n  command was:\n\n\n\n$cmd", $e->getCode());
+            throw new \Exception("command failed with exit code " . $rc . "\n  command was:\n\n\n\n$cmd", $rc);
         }
         return implode("\n", $output);
     }
+    
+    protected function read_json_file($path) {
+        return json_decode(file_get_contents($path), true);
+    }
+    
+    
 }
