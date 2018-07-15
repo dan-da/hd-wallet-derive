@@ -5,6 +5,9 @@ A command-line tool that derives bip32 addresses and private keys for Bitcoin an
 As of version 0.3.2, over 300 altcoins are available, 97 with bip44 path information.
 Bitcoin Cash "CashAddr" and Ethereum address types are supported.
 
+As of version 0.3.3, segwit keys and addresses are supported for Bitcoin as
+ypub keys with p2sh style addresses and zpub keys with bech32 addresses.
+
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
@@ -66,8 +69,9 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 +-------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+--------------------------------------------------------------------+-------+
 ```
 
-## Derive addresses from bip39 mnemonic seed words. (no password)
+## Derive addresses from bip39 mnemonic seed words.
 
+### Without a password
 ```
 $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
 
@@ -87,7 +91,7 @@ the coin then --path must be specified explicitly.
 you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
 
 
-## Derive addresses from bip39 mnemonic seed words. (with password)
+### With a password
 
 ```
 $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" --mnemonic-pw="mypass" --path="m/44'/0'/0'/0"  -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
@@ -101,7 +105,34 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 +-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
+### Using ypub extended key for segwit p2sh addresses.
+```
+$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --key-type=y --cols=path,address,xprv
+
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| path            | address                            | xprv                                                                                                            |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| m               | 32AuKZR2VDE92CnXqGA9ZT8tMxQdeMmWLs | yprvABrGsX5C9jantDNLPvwyh1vwBKLMuzyDnoCsRfcN1NCbCAvADvwK9BfKc2Rgo7gXRUQbA1q25HUdSQKczNBCnG8orV5dzmmn1M79U4g6cJu |
+| m/49'/0'/0'/0/0 | 3A9T2s8eeUbREb9DS3YFmK5wzajArDGvmY | yprvAN1znE9zGbrFzoVo8kSTYF7GHjDkmjkb2N8qeNA4Vecyt2t6AFroRzaLK6Fb13cidiNDAS2iL6jqrzkooz3XNQmKhBbdqiJeNhb155FS9nK |
+| m/49'/0'/0'/0/1 | 3HWjvs6ZFQQgWLcvdnDFDAt284FWroMGSz | yprvAN1znE9zGbrG4HArpijJbexkCEWP8oFyCAGfudZXEmuzLsPxoF6EJ7QAxWt4N8Ro3ebcoYyR9zxQhQxPDVwkFHqmUmTWy9BQG7uQjCjw8NS |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+```
+
+### Using zpub extended key for segwit bech32 addresses.
+```
+$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --key-type=z --cols=path,address,xprv
+
++-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| path            | address                                    | xprv                                                                                                            |
++-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| m               | bc1qxy9m2x2nhrunduvjz0hx8sdv6av52fqzqtfw08 | zprvAWgYBBk7JR8GjWZTEHjbu72SMHUorcxihuj6D4WFPNaUFGjPUb6smFKTdEPGo2LSq7XPuVRaXwqBKgwBi4bDaVpQipn4agbGH5AnrfYE8kQ |
+| m/84'/0'/0'/0/0 | bc1qy0p88n2d09ntyvjlkmum5p9rp2a99ws04cxjjv | zprvAgjsrdySZb8q4L1tQX9EmwRYa5Ldu3kPEK6YYPBt1Et64fovuAHA5izEPaFCCNZCkeUHnVcy9Z2B6cAauJa6mz9byU1KXEgfCo4qStWFF8D |
+| m/84'/0'/0'/0/1 | bc1qvznkdsdg3nwhjy08j3x9hc8u5mf0mfwhzwgych | zprvAgjsrdySZb8q7QEmNzR81DRaTQfjcq96znUUKGhH93eRZmyWV1vPc7QiBzYTMMBVmnvvz5XQ73ofAQSrfDu3RCJiT5cAR3nLNRJNJTrrpdt |
++-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+```
+
 note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+
 
 
 
@@ -119,6 +150,34 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 | m/1  | 12UMERLGAHKe5PQPaSYX8sczr52rSAg2Mi |         |
 | m/2  | 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr |         |
 +------+------------------------------------+---------+
+```
+
+## We can derive segwit keys
+
+### ypub / p2sh
+```
+$ ./hd-wallet-derive.php --key=yprvALsZfj564Q4XBd6aaAJ3sA1BVBhEw9Q8Xn7x9jFeMku6u2y6kRFdaDVFsdj9d8zuAdvwH5id6VJ5xKdwGJgMyx292kcJigqNdic2piwqAuL --numderive=3 --cols=path,address -g
+
++------+------------------------------------+
+| path | address                            |
++------+------------------------------------+
+| m/0  | 31qFbTk4btBfVVV3BrSopZQGfR5E5yqHQE |
+| m/1  | 3Qys6SzWm27q5KCeky5SQoaWUxLqd3xNnW |
+| m/2  | 3FKLumUJPQXtTScmpyQCEaHhePWrYcXQLj |
++------+------------------------------------+
+```
+
+### zpub / bech32
+```
+$ ./hd-wallet-derive.php --key=zprvAfvRyooajPigxomveEuGYUPwB7KLGseATsYbGB63S6wnFvFahfNnkBYmWCjhGmWbh7fJgNZSoUeAu7HcbRqcFtRPf5KXShRj7Sik7GadJrK --numderive=3 --cols=path,address -g
+
++------+--------------------------------------------+
+| path | address                                    |
++------+--------------------------------------------+
+| m/0  | bc1qgpkf27eva4rdqsd3cv60hywmc83k63g08xum60 |
+| m/1  | bc1qjfz7nn90szmzzy38jym79p0hxr8s2c4dxhj4v0 |
+| m/2  | bc1qv23447pd7ezf589d9elcuztz3pnarf0ndk2twv |
++------+--------------------------------------------+
 ```
 
 
@@ -188,6 +247,18 @@ $ ./hd-wallet-derive.php --coin=DOGE --gen-key --format=jsonpretty -g
 ]
 ```
 
+## Bitcoin key generation includes segwit keys and their paths.
+
+```
+$ ./hd-wallet-derive.php --gen-key --cols=path,xprv -g
++---------------+-----------------------------------------------------------------------------------------------------------------+
+| path          | xprv                                                                                                            |
++---------------+-----------------------------------------------------------------------------------------------------------------+
+| m/44'/0'/0'/0 | xprvA19NHbsi3bjKhC9DTPzg2mxfkgrPHyHtEJZUs3P17s8QeDiefRL7jGKkHapfqyxycCBW76bdYR2cezv1ECW4rNpmJ691XaGRVDbB8m4S1Ln |
+| m/49'/0'/0'/0 | yprvALsZfj564Q4XBd6aaAJ3sA1BVBhEw9Q8Xn7x9jFeMku6u2y6kRFdaDVFsdj9d8zuAdvwH5id6VJ5xKdwGJgMyx292kcJigqNdic2piwqAuL |
+| m/84'/0'/0'/0 | zprvAfvRyooajPigxomveEuGYUPwB7KLGseATsYbGB63S6wnFvFahfNnkBYmWCjhGmWbh7fJgNZSoUeAu7HcbRqcFtRPf5KXShRj7Sik7GadJrK |
++---------------+-----------------------------------------------------------------------------------------------------------------+
+```
 
 ## We can get results in a variety of additional formats
 
@@ -304,38 +375,55 @@ The report may be printed in the following formats:
    Options:
 
     -g                   go!  ( required )
-
+        
     --key=<key>          xpriv or xpub key
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
-
+                           
     --mnemonic-pw=<pw>   optionally specify password for mnemonic.
+    
+    --key-type           x | y | z
+                            applies to --mnemonic only.
 
+    --coin=<coin>        Coin Symbol ( default = btc )
+                         See --helpcoins for a list.
+                         
+    --helpcoins          List all available coins/networks.
+                         --format applies to output.
+    
     --numderive=<n>      Number of keys to derive.  default=10
 
-    --startderive=<n>    Starting key index to derive.  default=0
-
+    --startindex=<n>     Index to start deriving keys from.  default=0
+                            
     --cols=<cols>        a csv list of columns, or "all"
                          all:
-                          (path,address,xprv,xpub,privkey,pubkey,pubkeyhash,index,eth_address)
+                          (path,address,xprv,xpub,privkey,pubkey,pubkeyhash,index)
                          default:
                           (path,address,privkey)
 
+    --bch-format=<fmt>   Bitcoin cash address format.
+                           legacy|cash   default=cash
+                           
     --outfile=<path>     specify output file path.
     --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
-
+    
                          if 'all' is specified then a file will be created
                          for each format with appropriate extension.
                          only works when outfile is specified.
-
+                         
                          'list' prints only the first column. see --cols
-
+                         
     --path=<path>        bip32 path to derive, relative to provided key (m).
                            eg "", "m/0" or "m/1"
                            default = "m"
-
+                             if --mnemonic is used, then default is the
+                             bip44 path to extended key, eg m/44'/0'/0'/0
+                             which facilitates address derivation from
+                             mnemonic phrase.
+                           
     --includeroot       include root key as first element of report.
-
+    --gen-key           generates a new key.
+    
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  debug,info,specialinfo,warning,exception,fatalerror
                           default = info
