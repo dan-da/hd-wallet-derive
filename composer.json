@@ -2,7 +2,7 @@
     "name": "dan-da/hd-wallet-derive",
     "minimum-stability": "dev",
     "require": {
-        "bitwasp/bitcoin": "v0.0.35.0",
+        "bitwasp/bitcoin": "dev-master",
         "ext-json": "*",
         "php": ">=5.5",
         "dan-da/texttable-php": "1.0.3",

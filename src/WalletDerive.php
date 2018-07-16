@@ -6,7 +6,7 @@ require_once __DIR__  . '/../vendor/autoload.php';
 
 // For HD-Wallet Key Derivation
 use BitWasp\Bitcoin\Bitcoin;
-use BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 use BitWasp\Bitcoin\Crypto\Random\Random;
 use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
@@ -277,7 +277,7 @@ class WalletDerive
         
         $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);
 
-        $bip32 = HierarchicalKeyFactory::fromEntropy($seed, $ecAdapter = null, $scriptFactory);
+        $bip32 = $this->hkf->fromEntropy($seed, $scriptFactory);
         return $this->toExtendedKey($coin, $bip32, $network, $key_type );
     }
     
@@ -331,7 +331,7 @@ class WalletDerive
             
             $scriptFactory = $this->getScriptDataFactoryForKeyType($key_type);  // xpub
 
-            $xkey = HierarchicalKeyFactory::fromEntropy($seedinfo['seed'], Bitcoin::getEcAdapter(), $scriptFactory);
+            $xkey = $this->hkf->fromEntropy($seedinfo['seed'], $scriptFactory);
             $masterkey = $this->toExtendedKey($coin, $xkey, $network, $key_type);
             $row[$pf . 'root-key'] = $masterkey;
     
