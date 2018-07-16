@@ -456,11 +456,12 @@ secp256k1 extension from:
 # Thanks
 
 A big thank-you to the author of bitwasp/bitcoin-php.  This library does the
-heavy lifting of dealing with deterministic keys and multisig, amongst other
-things.
+heavy lifting of dealing with deterministic keys and all things bitcoin.
 
 
 # Todos
 
+* refactor under /src and make into a separate lib/package
+for high level derivation operations.
 * add test cases, ideally for each coin.
 * web frontend, maybe just for xpub keys, or to run locally.
