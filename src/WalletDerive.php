@@ -217,7 +217,15 @@ class WalletDerive
             $params = $this->get_params();
             $coin = $params['coin'];
         }
-        return explode('-', $this->coinToChain($coin));
+        list($symbol, $network) = explode('-', $this->coinToChain($coin));
+        // normalize values.
+        return [strtoupper($symbol), strtolower($network)];
+    }
+    
+    private function normalizeCoin($coin) {
+        list($symbol, $net) = $this->getSymbolAndNetwork($coin);
+        $suffix = $net == 'main' ? '' : '-' . $net;
+        return "$symbol" . $suffix;
     }
     
     private function getNetworkParams($coin=null) {
@@ -304,7 +312,7 @@ class WalletDerive
     protected function genKeysFromSeed($coin, $seedinfo) {
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
-        Bitcoin::setNetwork($network);        
+        Bitcoin::setNetwork($network);
         
                     // type   purpose        
         $key_types = ['x'  => 44,
@@ -321,7 +329,7 @@ class WalletDerive
                 // $data[$key_type] = null;
                 continue;
             }
-            $row = ['coin' => $coin,
+            $row = ['coin' => $this->normalizeCoin($coin),
                     'seed' => $seedinfo['seed']->getHex(),
                     'mnemonic' => $seedinfo['mnemonic']
                    ];
