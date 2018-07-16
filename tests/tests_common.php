@@ -45,11 +45,12 @@ abstract class tests_common extends tester\test_base {
         $prog = realpath(__DIR__ . '/../hd-wallet-derive.php');
         $cmd = sprintf('%s %s', $prog, $args);
 
+        // echo "running $cmd\n";
         exec($cmd, $output, $rc);
         if($rc != 0) {
             throw new \Exception("command failed with exit code " . $rc . "\n  command was:\n\n\n\n$cmd", $rc);
         }
-        return implode("\n", $output);
+        return trim(implode("\n", $output));
     }
     
     protected function read_json_file($path) {
