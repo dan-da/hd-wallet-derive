@@ -7,11 +7,13 @@
         "php": ">=5.5",
         "dan-da/texttable-php": "1.0.3",
         "dan-da/strictmode-php": "^1.0",
-        "dan-da/coinparams": "dev-master#7cea5505335c3b25308cfaa9ffcda0baa59a3950",
+        "dan-da/coinparams": "dev-master#2eb1be2a1055b538777b189b0eae8f6bdea18d62",
         "olegabr/keccak": "1.0.4"
     },
 
-    "require-dev": {},
+    "require-dev": {
+        "dan-da/tester-php": "1.0.2"
+    },
 
     "autoload": {
         "psr-4": {
