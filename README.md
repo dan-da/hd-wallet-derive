@@ -5,7 +5,7 @@ A command-line tool that derives bip32 addresses and private keys for Bitcoin an
 As of version 0.3.2, over 300 altcoins are available, 97 with bip44 path information.
 Bitcoin Cash "CashAddr" and Ethereum address types are supported.
 
-As of version 0.3.3, segwit keys and addresses are supported for Bitcoin as
+As of version 0.4.0, segwit keys and addresses are supported for Bitcoin as
 ypub keys with p2sh style addresses and zpub keys with bech32 addresses.
 
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
