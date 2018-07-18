@@ -107,7 +107,7 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 
 ### Using ypub extended key for segwit p2sh addresses.
 ```
-$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --key-type=y --cols=path,address,xprv
+$ ./hd-wallet-derive.php --key-type=y --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,xprv
 
 +-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | path            | address                            | xprv                                                                                                            |
@@ -120,7 +120,7 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 
 ### Using zpub extended key for segwit bech32 addresses.
 ```
-$ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --key-type=z --cols=path,address,xprv
+$ ./hd-wallet-derive.php --key-type=z --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,xprv
 
 +-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | path            | address                                    | xprv                                                                                                            |
@@ -132,8 +132,6 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 ```
 
 note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
-
-
 
 
 ## Derive addresses from xpub key
@@ -247,7 +245,7 @@ $ ./hd-wallet-derive.php --coin=DOGE --gen-key --format=jsonpretty -g
 ]
 ```
 
-## Bitcoin key generation includes segwit keys and their paths.
+## Key generation includes segwit keys and their paths.
 
 ```
 $ ./hd-wallet-derive.php --gen-key --cols=path,xprv -g
@@ -326,6 +324,113 @@ change addresses. Expert users may have trickier uses for this flag.
 Due to the simplicity of this approach, the tool does not need to know or care about specific
 bip32 path layouts such as bip44, bip45, etc.
 
+# Segwit notes
+
+*Segwit support is considered experimental in this release!*
+
+This tool uses the notation x,y,z to indicate the extended key prefix bytes,
+regardless of coin or network.
+
+The meanings of x,y,z are:
+
+|key-type|meaning        |
+|--------|---------------|
+|x       |p2pkh or p2sh  |
+|y       |p2wpkh in p2sh |
+|z       |p2wpkh         |
+
+
+Some examples:
+
+|key-type|coin      |network  |private ext key prefix|public ext key prefix|
+|--------|----------|---------|----------------------|---------------------|
+|x       |BTC       |Mainnet  |xprv                  |xpub                 |
+|y       |BTC       |Mainnet  |yprv                  |ypub                 |
+|z       |BTC       |Mainnet  |zprv                  |zpub                 |
+|x       |BTC-test  |Testnet  |tprv                  |tpub                 |
+|y       |BTC-test  |Testnet  |uprv                  |upub                 |
+|z       |BTC-test  |Testnet  |vprv                  |vpub                 |
+|x       |DOGE      |Mainnet  |dgpv                  |dgub                 |
+|x       |OK        |Mainnet  |okpv                  |okub                 |
+
+At present, most coins do not have prefixes defined for y and z types.
+This tool will default to BTC values for y and z in these cases, although
+z will not work unless bech32_prefix is defined in the coin's source code.
+
+[Slip132](https://github.com/satoshilabs/slips/blob/master/slip-0132.md) has a list of known prefix types.
+
+Anyway, y and z addresses for coins other than BTC are for experimental purposes
+only and you should never send money to one without first verifying it in your
+wallet software.
+
+
+# Litecoin notes
+
+LTC went off the rails a bit and did two funky things:
+
+1. Litecoin-core always used xpub/xprv like BTC, but some wallets started
+using Ltub and now Mtub for segwit p2sh extended keys.  This tool uses
+xpub/xprv by default, but exposes a command-line option *--alt-extended=Ltub*
+which will use the alternate prefixes.  Note that this is only relevant to
+extended key generation.  Both xpub and Ltub style keys will generate the
+exact same addresses.
+
+2. Liteoin-core changed the SCRIPT_ADDRESS prefix for p2sh addresses. It
+can read old and new style, but will generate new style.  This tool
+generates only new style.
+
+## xpub vs Ltub keys.
+
+notice below that the generated addresses are the same as are the privkey and pubkey but the encoding of the xprv and xpub are different.
+
+```
+ ./hd-wallet-derive.php --coin=LTC --mnemonic="wagon rail round impulse donor radar escape harsh series" --numderive=1 --includeroot --cols=path,address,xprv,xpub,privkey,pubkey -g
+
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+
+| path            | address                            | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | pubkey                                                             |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+
+| m               | LKNY2uPMT9pXG1k9pHrfv5PAHXy5Skt4B5 | xprv9s21ZrQH143K277qXR6NRni1DS7qmSNBs96NmnF5VGdcejgrJtBHzRJYZxqDJZKX1pF5i6gmmDmWDbBCs4DcQ9T1bH65UttBRw2uMaNJnNQ | xpub661MyMwAqRbcEbCJdSdNnvejmTxLAu63EN1yaAeh3cAbXY1zrRVYYDd2RH3654fwTBL4HaFhoMSuo8h8T7iAM7sVLhgKU6WB2EAGTkQh4zu | T5z8xkPacjcxmaQuTnTvc9nJwguGyQdvsHBFhRceBS3vWG3rxSiM | 03f99450e4f69f1e03b778e60b0339a5a6a39525c071dfb0f41b55e1afe0fa7fdc |
+| m/44'/2'/0'/0/0 | LYy3dBHszRadxCVczpsxaND32FoaAa8nbk | xprvA2rhfN2XaYQLti4axzziLV6djZrjCo4Wbwi73sbiCVVba9av45Z2MGeKi14Eqgq7pUKgxHuYAdLZ5FYu8oANqeqkDgd3tFmFHvNv8CHzEfH | xpub6Fr44sZRQuxe7C9452Xihd3NHbhDcFnMyAdhrG1Kkq2aSwv4bcsGu4xoZFJuaQ165C7sp4H1WFVV2AoYZLQ7puBFsGqucYCtQpWAt487nr1 | TArerCDBMzqdgM3zprT7hJZobonS16BZgUaj2m7irgRynQ1TNW4e | 028278f02f088cf83910006ff226e35190abef67aee82e761a29f96a7a5833d048 |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+
+
+$ ./hd-wallet-derive.php --alt-extended=Ltub --coin=LTC --mnemonic="wagon rail round impulse donor radar escape harsh series" --numderive=1 --includeroot --cols=path,address,xprv,xpub,privkey,pubkey -g
+
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+
+| path            | address                            | xprv                                                                                                            | xpub                                                                                                            | privkey                                              | pubkey                                                             |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+
+| m               | LKNY2uPMT9pXG1k9pHrfv5PAHXy5Skt4B5 | Ltpv71G8qDifUiNes5mQyK8zaCvkQhahrS3XH87vjGdWUvDhfYTjBWwrMG1CXjNEBGxhvvpMncLHvJUAD6JHGBCb3FpMYr3FnqwDEKeoR2568uZ | Ltub2SSUS19CirucUxUFDvdNenkxrGGtvgcBMeDxQFPoR71JFueoWRzHMs7Tn9Z7jU5C3PjdsheFeP6HuE4FN1ocC3eudqZn8nGDWivcNFPktRC | T5z8xkPacjcxmaQuTnTvc9nJwguGyQdvsHBFhRceBS3vWG3rxSiM | 03f99450e4f69f1e03b778e60b0339a5a6a39525c071dfb0f41b55e1afe0fa7fdc |
+| m/44'/2'/0'/0/0 | LYy3dBHszRadxCVczpsxaND32FoaAa8nbk | Ltpv7B6pvjLv4CjgjgiAQu3LUuKNvqKbHnjr1vjf1Mz9C95gaxMnviKai7LyfmbFiQUJjaty2oZ4Ki3D4kfyXv9MUmD6BFaECCpH6JzpBgw25UA | Ltub2cHAXWmTJMGeMZQzfWXiZV9bNQ1nN3JW6SqggLkS8KsHBKYsFdN1iiTEv7pwEoQLfQXTQBfZMH8s8GAfUEVZfpxgAQjNHDxvuKGWnWWk8Xv | TArerCDBMzqdgM3zprT7hJZobonS16BZgUaj2m7irgRynQ1TNW4e | 028278f02f088cf83910006ff226e35190abef67aee82e761a29f96a7a5833d048 |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+
+```
+
+note: When deriving with --key="Ltub......", the *--alt-extended=Ltub* flag must be included or
+an error will be generated.
+
+The *--alt-extended=Ltub* applies to all LTC operations include key generation,
+key derivation via --key or --mnemonic as well as to LTC testnet and segwit (y,z) keys.
+
+## Here we see Mtub key and new style 'M' p2sh address.
+```
+$ ./hd-wallet-derive.php --key-type=y --alt-extended=Ltub --coin=LTC --mnemonic="wagon rail round impulse donor radar escape harsh series"  --numderive=1 --includeroot --cols=path,address,xpub -g
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| path            | address                            | xpub                                                                                                            |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| m               | MTcqc7d7YeCCqtznxqukXhvuXjFU3YiNYY | Mtub2mGjjfp7sYT6LFfN4HQzrsrU2ERLsJbgGkkBBeHgo7PBK1U2m69qyvmboMWhjNj7T2rSdBEp73SqnWfp5iDczHLWWBGCih5hnSzFkqKszC1 |
+| m/49'/2'/0'/0/0 | MDrdvYHZXqkT2pd7VDZgz2WUs8zg7ZfkDf | Mtub2wrQVfmfLAR5st3nERaqt9FYnD8guDyrjxew73rWq2zUHiV95434YnMjowEoq4723ZQ27Kw8i6vSRyQaCoraNPKpMHyaLhquS5Gkq7XNhjC |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+```
+
+## And a ttub testnet key
+```
+$ ./hd-wallet-derive.php  --alt-extended=Ltub --coin=LTC-test --mnemonic="wagon rail round impulse donor radar escape harsh series"  --numderive=1 --includeroot --cols=path,address,xpub -g
+
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| path            | address                            | xpub                                                                                                            |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| m               | mffY4kAWBX1inKXcMiqkTyXiwKCWC3fiH6 | ttub4XNESS7BCg9c1Teh7mfmHL5gLFFmJfs5TADpxkPThNp41RnVWdkwdBrW7tJkAPRjfQVJFSp3yoBdy4jS6fYkdDKSskLLpkXdX56FWPahTBW |
+| m/44'/1'/0'/0/0 | mnuJrsWK9XjTLME4GHo1tLNd6TFrGjtAaG | ttub4hLeb7yEPwSJkhbb5hjEuZ8BeYUaJJJNQvUSL92ohB3Kj8L6phZ2YSpAFisrjxowXYSDbYHxu46wfv5EqZKkM5E66mWhcA51bSPpj3z7o69 |
++-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+```
 
 
 # Privacy and Security implications
@@ -344,6 +449,9 @@ Further, when you run this tool in a terminal, the executed command(s) will
 usually be saved to a history file -- including your xprv or xpub key! You
 should be very careful to either expunge the command(s), or move the funds to
 another wallet, or be certain untrusted parties cannot access your machine.
+
+Finally, this tool depends on libraries written by other authors and they
+have not been carefully audited for security.  So use at your own risk.
 
 
 # Use at your own risk.
@@ -403,9 +511,11 @@ The report may be printed in the following formats:
 
     --bch-format=<fmt>   Bitcoin cash address format.
                            legacy|cash   default=cash
+    --alt-extended=<id>  Use alternate extended keys. supported:
+                           LTC:  Ltub
                            
     --outfile=<path>     specify output file path.
-    --format=<format>    txt|csv|json|jsonpretty|html|list|all   default=txt
+    --format=<format>    txt|md|csv|json|jsonpretty|html|list|all   default=txt
     
                          if 'all' is specified then a file will be created
                          for each format with appropriate extension.
