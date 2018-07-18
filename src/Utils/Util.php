@@ -179,7 +179,7 @@ class Util
     --bch-format=<fmt>   Bitcoin cash address format.
                            legacy|cash   default=cash
     --alt-extended=<id>  Use alternate extended keys. supported:
-                           LTC:  LTub
+                           LTC:  Ltub
                            
     --outfile=<path>     specify output file path.
     --format=<format>    txt|md|csv|json|jsonpretty|html|list|all   default=txt
