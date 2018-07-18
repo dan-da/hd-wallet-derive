@@ -388,12 +388,13 @@ class WalletDerive
                 $row[$pf . 'path'] = $bip32path;
                 $row['xprv'] = $this->toExtendedKey($coin, $prv, $network, $key_type);
                 $row['xpub'] = $this->toExtendedKey($coin, $pub, $network, $key_type);
+                $row['comment'] = null;
             }
             else {
                 $row[$pf . 'path'] = null;
                 $row['xprv'] = null;
                 $row['xpub'] = null;
-                $row['warning'] = "Bip44 ID is missing for this coin";
+                $row['comment'] = "Bip44 ID is missing for this coin, so extended keys not generated.";
             }
             $rows[] = $row;
         }
@@ -501,7 +502,7 @@ class WalletDerive
      */
     static public function all_cols_genkey()
     {
-        return ['coin', 'seed', 'mnemonic', 'root-key', 'path', 'xprv', 'xpub'];
+        return ['coin', 'seed', 'mnemonic', 'root-key', 'path', 'xprv', 'xpub', 'comment'];
     }
     
     
@@ -516,7 +517,7 @@ class WalletDerive
      */
     static public function default_cols_genkey()
     {
-        return ['coin', 'seed', 'mnemonic', 'root-key', 'path', 'xprv', 'xpub'];
+        return ['coin', 'seed', 'mnemonic', 'root-key', 'path', 'xprv', 'xpub', 'comment'];
     }
     
 }
