@@ -36,16 +36,16 @@ class ltc extends tests_common {
         $params = ['key' => $xprv,
                    'coin' => 'LTC',
                    'numderive' => 1,
-                   'alt-extended' => 'LTub',
+                   'alt-extended' => 'Ltub',
                    'cols' => 'address',
                    'format' => 'list',
                    ];        
         $address = $this->derive_params( $params );
-        $this->eq( $address, $addr_correct, 'LTC-main LTub x address from Ltpv' );
+        $this->eq( $address, $addr_correct, 'LTC-main Ltub x address from Ltpv' );
 
         $params['key'] = $xpub;
         $address = $this->derive_params( $params );
-        $this->eq( $address, $addr_correct, 'LTC-main LTub x address from Ltub' );
+        $this->eq( $address, $addr_correct, 'LTC-main Ltub x address from Ltub' );
     }
 
     protected function test_ltc_ltub_mnemonic() {
@@ -56,12 +56,12 @@ class ltc extends tests_common {
         $params = ['mnemonic' => $mnemonic,
                    'coin' => 'LTC',
                    'numderive' => 1,
-                   'alt-extended' => 'LTub',
+                   'alt-extended' => 'Ltub',
                    'cols' => 'address',
                    'format' => 'list',
                    ];        
         $address = $this->derive_params( $params );
-        $this->eq( $address, $addr_correct, 'LTC-main LTub x address from nmemonic' );
+        $this->eq( $address, $addr_correct, 'LTC-main Ltub x address from nmemonic' );
         
         $params['key-type'] = 'y';
         $address = $this->derive_params( $params );
@@ -69,14 +69,14 @@ class ltc extends tests_common {
         // at https://litecoin-project.github.io/p2sh-convert/
         $addr_correct = '33D1fRZSZvjJMpko6cpAuJzgEjHK7yr3dX';  // when using scripthash = 5. (old style p2sh)
         $addr_correct = 'M9R9yJyQX3ajAL2hCVoWixF5ZRsm49toRD';  // when using scripthash = 50 (new style p2sh).   and matches iancoleman's tool.
-        $this->eq( $address, $addr_correct, 'LTC-main LTub y address from nmemonic' );
+        $this->eq( $address, $addr_correct, 'LTC-main Ltub y address from nmemonic' );
         
         $params['coin'] = 'LTC-test';
         $params['key-type'] = 'x';
         unset($params['key-type']);
         $addr_correct = 'n24BJTmgneQUJxWEHpwpQCYRdirecJpoFN';
         $address = $this->derive_params( $params );
-        $this->eq( $address, $addr_correct, 'LTC-test LTub x address from nmemonic' );
+        $this->eq( $address, $addr_correct, 'LTC-test Ltub x address from nmemonic' );
 
         $params['key-type'] = 'y';
         unset($params['alt-extended']);
