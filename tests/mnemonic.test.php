@@ -82,7 +82,8 @@ class mnemonic extends tests_common {
         $address = $this->derive_params( $params );
         $addr_correct = 'mxcgHPeZvhQYypoFqr5GRzQeogjc16dWya';
         $this->eq( $address, $addr_correct, 'btc regtest xprv addr' );
-        
+
+/* y,z prefix values not yet known for regtest.       
         $params['key-type'] = 'y';
         $address = $this->derive_params( $params );
         $addr_correct = '2NAGHgSwxHufJVmvB2ZncTqFvnmk9R7nX6e';
@@ -91,7 +92,8 @@ class mnemonic extends tests_common {
         $params['key-type'] = 'z';
         $address = $this->derive_params( $params );
         $addr_correct = 'bcrt1q086tqpwxkk4xdz3jw7pxwgluap0vu7hrwtkyjz';
-        $this->eq( $address, $addr_correct, 'btc regtest zprv addr' );        
+        $this->eq( $address, $addr_correct, 'btc regtest zprv addr' );
+ */
     }
     
 }

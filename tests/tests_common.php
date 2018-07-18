@@ -9,10 +9,17 @@ use tester;
 
 abstract class tests_common extends tester\test_base {
     
-    protected function derive_params($params) {
+    protected function derive_params($params, $expect_rc=0) {
         return !@$params['format'] || in_array($params['format'], ['json', 'jsonpretty']) ?
             $this->exec_json($this->gen_args($params)) :
-            $this->exec($this->gen_args($params));
+            $this->exec($this->gen_args($params), $expect_rc);
+    }
+    
+    protected function exec_params_expect_error($params, $expect_rc, $expect_str, $label='error message') {
+        $output = $this->derive_params($params, $expect_rc);
+        if( $expect_str ) {
+            $this->contains( $output, $expect_str, $label );
+        }
     }
     
     protected function gen_args($params, $defaults=true) {
@@ -35,19 +42,24 @@ abstract class tests_common extends tester\test_base {
         return $argbuf;
     }
     
-    protected function exec_json($args) {
-        $output = $this->exec($args);
+    protected function exec_json($args, $expect_rc=0) {
+        $output = $this->exec($args, $expect_rc);
         return json_decode($output, true);
     }
     
-    protected function exec($args) {
+    protected function exec($args, $expect_rc=0) {
         
         $prog = realpath(__DIR__ . '/../hd-wallet-derive.php');
-        $cmd = sprintf('%s %s', $prog, $args);
+        $cmd = sprintf('%s %s 2>&1', $prog, $args);
 
         // echo "running $cmd\n";
         exec($cmd, $output, $rc);
-        if($rc != 0) {
+        
+        if( $expect_rc != 0 || $rc != $expect_rc) {
+            $this->eq($rc, $expect_rc, 'command exit code');
+        }
+        
+        if($rc == 0 && $rc != $expect_rc) {
             throw new \Exception("command failed with exit code " . $rc . "\n  command was:\n\n\n\n$cmd", $rc);
         }
         return trim(implode("\n", $output));

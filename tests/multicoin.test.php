@@ -32,7 +32,7 @@ class multicoin extends tests_common {
                 'format' => 'list'
             ];
             $address = trim($this->derive_params($params));
-            $this->eq($address, $row['address_1'], 'addr from xpub');
+            $this->eq($address, $row['address_1'], "{$row['coin']} addr from xpub");
         }
     }
 }
