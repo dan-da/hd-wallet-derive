@@ -6,13 +6,13 @@
         "ext-json": "*",
         "php": ">=5.5",
         "dan-da/texttable-php": "1.0.3",
-        "dan-da/strictmode-php": "^1.0",
+        "dan-da/strictmode-php": "1.0.1",
         "dan-da/coinparams": "dev-master#2eb1be2a1055b538777b189b0eae8f6bdea18d62",
         "olegabr/keccak": "1.0.4"
     },
 
     "require-dev": {
-        "dan-da/tester-php": "1.0.2"
+        "dan-da/tester-php": "dev-master#8a6fb49ff38b01e178421165daac01d348f2e86e"
     },
 
     "autoload": {
