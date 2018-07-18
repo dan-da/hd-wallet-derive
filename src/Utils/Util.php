@@ -32,6 +32,7 @@ class Util
             'logfile:', 'loglevel:',
             'list-cols',
             'bch-format:',
+            'alt-extended:',
             'gen-key', 'gen-key-all',
             'version', 'help', 'helpcoins',
         );
@@ -108,6 +109,7 @@ class Util
 
         $params['bch-format'] = @$params['bch-format'] ?: 'cash';
         $params['numderive'] = @$params['numderive'] ?: 10;
+        $params['alt-extended'] = @$params['alt-extended'] ?: null;
         $params['startindex'] = @$params['startindex'] ?: 0;
         $params['includeroot'] = isset($params['includeroot'] );
         $params['gen-key'] = isset($params['gen-key']);
@@ -176,6 +178,8 @@ class Util
 
     --bch-format=<fmt>   Bitcoin cash address format.
                            legacy|cash   default=cash
+    --alt-extended=<id>  Use alternate extended keys. supported:
+                           LTC:  LTub
                            
     --outfile=<path>     specify output file path.
     --format=<format>    txt|md|csv|json|jsonpretty|html|list|all   default=txt
@@ -211,7 +215,7 @@ END;
     
     public static function printHelpCoins( $params ) {
         $allcoins = NetworkCoinFactory::getNetworkCoinsList();
-        
+
         $data = [];
         foreach($allcoins as $k => $v) {
             $data[] = ['Symbol' => $k,

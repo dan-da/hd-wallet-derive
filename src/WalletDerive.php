@@ -25,7 +25,7 @@ use BitWasp\Bitcoin\Crypto\EcAdapter\EcAdapterFactory;
 use Mdanter\Ecc\Serializer\Point\UncompressedPointSerializer;
 use Mdanter\Ecc\EccFactory;
 
-// For slip132
+// For segwit extended key prefixes (ypub and friends)
 use BitWasp\Bitcoin\Address\AddressCreator;
 use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\GlobalPrefixConfig;
 use BitWasp\Bitcoin\Key\Deterministic\HdPrefix\NetworkConfig;
@@ -94,7 +94,7 @@ class WalletDerive
          *  ROOT PATH INCLUSION
          * */
         if( $params['includeroot'] ) {
-            $this->derive_key_worker($symbol, $network, $addrs, $master, null, 'm');
+            $this->derive_key_worker($coin, $symbol, $network, $addrs, $master, $key_type, null, 'm');
         }
 
         MyLogger::getInstance()->log( "Generating addresses", MyLogger::info );
@@ -115,6 +115,11 @@ class WalletDerive
     }
     
     private function derive_key_worker($coin, $symbol, $network, &$addrs, $key, $key_type, $index, $path) {
+
+        if( !$this->networkSupportsKeyType($network, $key_type, $coin ) ) {
+            throw new Exception("$key_type extended keys are not supported for $coin" );
+        }
+
         $params = $this->get_params();
         if(method_exists($key, 'getPublicKey')) {
             $address = strtolower($symbol) == 'eth' ?
@@ -163,17 +168,12 @@ class WalletDerive
         $rkp = $s->fromParser(new Parser(Base58::decodeCheck($key)));
         $key_prefix = '0x' . $rkp->getPrefix();
 
-        // Get slip132 values if available. Else use bip32 xpub values.
-        // slip132 is considered a superset because it defines ypub, zpub, etc.
-        $slip132 = @$nparams['prefixes']['slip132'];
-        if(!$slip132) {
-            $slip132 = ['xpub' => $nparams['prefixes']['bip32'] ];
-        }
-        foreach($slip132 as $kt => $info) {
-            if( $key_prefix  == strtolower($info['public']) ) {
+        $ext = $this->getExtendedPrefixes($coin);
+        foreach($ext as $kt => $info) {
+            if( $key_prefix  == strtolower(@$info['public']) ) {
                 return $kt[0];
             }
-            if( $key_prefix == strtolower($info['private']) ) {
+            if( $key_prefix == strtolower(@$info['private']) ) {
                 return $kt[0];
             }
         }
@@ -190,6 +190,8 @@ class WalletDerive
 
         $prefix = $this->getScriptPrefixForKeyType($coin, $key_type);
         $config = new GlobalPrefixConfig([new NetworkConfig($network, [$prefix]),]);
+//print_r($config); exit;  
+        
         $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
         return $serializer;
     }
@@ -209,7 +211,7 @@ class WalletDerive
             default:
                 throw new Exception("Unknown key type: $key_type");
         }
-        return $factory;        
+        return $factory;
     }
     
     private function getSymbolAndNetwork($coin = null) {
@@ -233,9 +235,42 @@ class WalletDerive
         return coinparams::get_coin_network($symbol, $net);
     }
     
-    private function networkSupportsKeyType($network, $key_type, $coin=null) {
+    private function getExtendedPrefixes($coin) {
+        $params = $this->get_params();
         $nparams = $this->getNetworkParams($coin);
-        $mcr = new MultiCoinRegistry($nparams);  // todo: cache these objects.
+        if( @$params['alt-extended'] ) {
+            $ext = @$params['alt-extended'];
+            $val = @$nparams['prefixes']['extended']['alternates'][$ext];
+            if(!$val) {
+                throw new \Exception("Invalid value for --alt-extended.  Check coin type");
+            }
+        }
+        else {
+            $val = @$nparams['prefixes']['extended'];
+            unset($val['alternates']);
+        }
+        $val = $val ?: [];
+        // ensure no entries with empty values.
+        foreach($val as $k => $v) {
+            if(!@$v['public'] || !@$v['private']) {
+                unset($val[$k]);
+            }
+        }
+        return $val;
+    }
+    
+    private function networkSupportsKeyType($network, $key_type, $coin) {
+        if($key_type == 'z') {
+            try {
+                $network->getSegwitBech32Prefix();
+            }
+            catch(Exception $e) {
+                return false;
+            }
+        }
+        $nparams = $this->getNetworkParams($coin);
+        $ext_prefixes = $this->getExtendedPrefixes($coin);
+        $mcr = new MultiCoinRegistry($ext_prefixes);  // todo: cache these objects.
         return (bool)$mcr->prefixBytesByKeyType($key_type);        
     }
     
@@ -245,8 +280,8 @@ class WalletDerive
         
         $adapter = Bitcoin::getEcAdapter();
         $slip132 = new Slip132(new KeyToScriptHelper($adapter));
-        $coinMeta = coinparams::get_coin_network($symbol, $net);
-        $coinPrefixes = new MultiCoinRegistry($coinMeta);
+        $ext_prefixes = $this->getExtendedPrefixes($coin);
+        $coinPrefixes = new MultiCoinRegistry($ext_prefixes);
         switch( $key_type ) {
             case 'x': $prefix = $slip132->p2pkh($coinPrefixes); break;
             case 'X': $prefix = $slip132->p2shP2pkh($coinPrefixes); break;  // also xpub.  this case won't work.
@@ -257,6 +292,7 @@ class WalletDerive
             default:
                 throw new Exception("Unknown key type: $key_type");
         }
+        
         return $prefix;
     }
     

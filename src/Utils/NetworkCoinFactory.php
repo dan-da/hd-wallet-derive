@@ -22,8 +22,8 @@ class NetworkCoinFactory extends Network
         $list = [];
         foreach($coins as $sym => $c) {
             foreach($c as $net => $info) {
-                if(!@$info['prefixes']['bip32']['public'] ||
-                   !@$info['prefixes']['bip32']['private'] ) {
+                if(!@$info['prefixes']['extended']['xpub']['public'] ||
+                   !@$info['prefixes']['extended']['xpub']['private'] ) {
                     continue;
                 }
                 $suffix = $net == 'main' ? '' : "-$net";

@@ -22,21 +22,29 @@ class FlexNetwork extends Network {
         }
         
         $params = coinParams::get_coin_network($coin, $network);
+        $prefixes = @$params['prefixes'];
         
+        // Prefer scripthash2 to scripthash. For coins like LTC that
+        // changed p2sh prefix after-launch to differentiate from BTC.
+        // could be made configurable.
+        $scripthash = @$prefixes['scripthash2'] ?
+                        $prefixes['scripthash2'] : $prefixes['scripthash'];
+                        
         $this->base58PrefixMap = [
             self::BASE58_ADDRESS_P2PKH => self::dh(@$params['prefixes']['public']),
-            self::BASE58_ADDRESS_P2SH => self::dh(@$params['prefixes']['scripthash']),
+            self::BASE58_ADDRESS_P2SH => self::dh($scripthash),
             self::BASE58_WIF => self::dh(@$params['prefixes']['private']),
         ];
         
-        $this->bech32PrefixMap = [
-            self::BECH32_PREFIX_SEGWIT => @$params['prefixes']['bech32'],
-        ];
+        $this->bech32PrefixMap = [];
+        if( @$params['prefixes']['bech32'] ) {
+            $this->bech32PrefixMap[self::BECH32_PREFIX_SEGWIT] = @$params['prefixes']['bech32'];
+        }
         
         $this->bip32PrefixMap = [
             // https://github.com/zcash/zcash/blob/master/src/chainparams.cpp#L146-L147
-            self::BIP32_PREFIX_XPUB => self::th(@$params['prefixes']['bip32']['public'], true),
-            self::BIP32_PREFIX_XPRV => self::th(@$params['prefixes']['bip32']['private'], true),
+            self::BIP32_PREFIX_XPUB => self::th(@$params['prefixes']['extended']['xpub']['public'], true),
+            self::BIP32_PREFIX_XPRV => self::th(@$params['prefixes']['extended']['xpub']['private'], true),
         ];
     
         $this->bip32ScriptTypeMap = [

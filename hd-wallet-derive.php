@@ -72,7 +72,6 @@ function main()
     catch(Exception $e)
     {
         MyLogger::getInstance()->log_exception( $e );
-        
         // print validation errors to stderr.
         if( $e->getCode() == 2 ) {
             fprintf( STDERR, $e->getMessage() . "\n\n" );

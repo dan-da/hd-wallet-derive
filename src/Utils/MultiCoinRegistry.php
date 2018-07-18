@@ -8,16 +8,42 @@ use BitWasp\Bitcoin\Script\ScriptType;
 class MultiCoinRegistry extends PrefixRegistry
 {
     private $key_type_map;
-    
-    public function __construct($coinmeta)
+
+    /**
+     * extended_map should look like:
+     * {
+     *    "xpub": {
+     *      "public": "0xXXXXXXXX",
+     *      "private": "0xXXXXXXXX"
+     *    },
+     *    "ypub": {
+     *      "public": "0xXXXXXXXX",
+     *      "private": "0xXXXXXXXX"
+     *    },
+     *    "zpub": {
+     *      "public": "0xXXXXXXXX",
+     *      "private": "0xXXXXXXXX"
+     *    },
+     *    "Ypub": {
+     *      "public": "0xXXXXXXXX",
+     *      "private": "0xXXXXXXXX"
+     *    },
+     *    "Zpub": {
+     *      "public": "0xXXXXXXXX",
+     *      "private": "0xXXXXXXXX"
+     *    }
+     * }
+     */
+    public function __construct($extended_map)
     {
+        $em = $extended_map;
         $map = [];
         $t = [];
-        $x = @$coinmeta['prefixes']['bip32'];
-        $y = @$coinmeta['prefixes']['slip132']['ypub'];
-        $Y = @$coinmeta['prefixes']['slip132']['Ypub'];
-        $z = @$coinmeta['prefixes']['slip132']['zpub'];
-        $Z = @$coinmeta['prefixes']['slip132']['Zpub'];
+        $x = @$em['xpub'];
+        $y = @$em['ypub'];
+        $Y = @$em['Ypub'];
+        $z = @$em['zpub'];
+        $Z = @$em['Zpub'];
         
         $st = [
             'x'  => [ScriptType::P2PKH],
