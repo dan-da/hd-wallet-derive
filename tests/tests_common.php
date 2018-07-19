@@ -8,6 +8,7 @@ require_once __DIR__  . '/../vendor/autoload.php';
 use tester;
 
 abstract class tests_common extends tester\test_base {
+    protected $last_cmd = null;
     
     protected function derive_params($params, $expect_rc=0) {
         return !@$params['format'] || in_array($params['format'], ['json', 'jsonpretty']) ?
@@ -52,7 +53,7 @@ abstract class tests_common extends tester\test_base {
         $prog = realpath(__DIR__ . '/../hd-wallet-derive.php');
         $cmd = sprintf('%s %s 2>&1', $prog, $args);
 
-        // echo "running $cmd\n";
+        $this->last_cmd = $cmd;
         exec($cmd, $output, $rc);
         
         if( $expect_rc != 0 || $rc != $expect_rc) {
@@ -68,6 +69,11 @@ abstract class tests_common extends tester\test_base {
     protected function read_json_file($path) {
         return json_decode(file_get_contents($path), true);
     }
+    
+    protected function add_failnotes() {
+        $cmd_note = "--- command was: ---\n  {$this->last_cmd}\n---";
+        return [$cmd_note];
+    }    
     
     
 }
