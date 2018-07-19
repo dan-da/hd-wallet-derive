@@ -98,8 +98,23 @@ class Util
         }
         $params['key-type'] = $keytype;
         
-        if( @$params['path'] && !is_numeric($params['path']) && $params['path']{0} != 'm' ) {
-            throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
+        if( @$params['path'] ) {
+            if(!preg_match('/[m\d]/', $params['path'][0]) ) {
+                throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
+            }
+            if(!preg_match("#^[/\d']*$#", @substr($params['path'], 1) ) ) {
+                throw new Exception( "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/]");
+            }
+            if(preg_match('#//#', $params['path']) ) {
+                throw new Exception( "path parameter is invalid.  It must not contain '//'");
+            }
+            if(preg_match("#/'#", $params['path']) ) {
+                throw new Exception( "path parameter is invalid. single-quote must follow an integer");
+            }
+            if(preg_match("#''#", $params['path']) ) {
+                throw new Exception( "path parameter is invalid. It must not contain \"''\"");
+            }
+            $params['path'] = rtrim($params['path'], '/');  // trim any trailing path separator.
         }
 
         $params['cols'] = static::getCols( $params );
