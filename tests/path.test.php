@@ -38,6 +38,15 @@ class path extends tests_common {
         $address = $this->derive_params( $params );
         $this->eq($address, $addr_correct, 'path --> m/0');
 
+        $addr_correct = '1KXfyQubJA5db6RzsEwbK2TmwtKXKQn932';
+        $params['path'] = '0/0';
+        $address = $this->derive_params( $params );
+        $this->eq($address, $addr_correct, 'path --> 0');
+
+        $params['path'] = 'm/0/0';
+        $address = $this->derive_params( $params );
+        $this->eq($address, $addr_correct, 'path --> m/0');        
+        
         $addr_correct = '1FFWo72KpeRTyaUk3k29VzsZsAza7cSwEG';
         $params['path'] = 'm/1';
         $address = $this->derive_params( $params );
