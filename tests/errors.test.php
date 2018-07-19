@@ -22,7 +22,7 @@ class errors extends tests_common {
                    'key-type' => 'z',
                    'format' => 'list',
         ];        
-        $this->exec_params_expect_error( $params, $expect_rc, $expect_str );
+        $this->exec_params_expect_error( $params, $expect_rc, $expect_str, 'unsupported key-type' );
     }
 
     protected function test_required_args() {
@@ -31,8 +31,7 @@ class errors extends tests_common {
         
         // check xprv derivation results in correct addresses.
         $params = ['format' => 'list'];        
-        $this->exec_params_expect_error( $params, $expect_rc, $expect_str );
+        $this->exec_params_expect_error( $params, $expect_rc, $expect_str, 'missing --key or --nmenonic' );
     }
-
     
 }
