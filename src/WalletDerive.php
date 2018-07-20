@@ -34,6 +34,7 @@ use BitWasp\Bitcoin\Key\KeyToScript\KeyToScriptHelper;
 use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\Base58ExtendedKeySerializer;
 use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
 use App\Utils\MultiCoinRegistry;
+use BitWasp\Bitcoin\Network\Slip132\BitcoinRegistry;
 
 // For determining key type via Base58 encode/decode
 use BitWasp\Buffertools\Buffer;
@@ -99,13 +100,23 @@ class WalletDerive
 
         MyLogger::getInstance()->log( "Generating addresses", MyLogger::info );
         $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
+        
+        // Allow paths to end with i or i'.
+        // i' specifies that addresses should be hardened.
+        $pparts = explode('/', $path_base);
+        $hardened = end($pparts) == "x'";
+        if(end($pparts)[0] == 'x') {
+            array_pop($pparts);
+        }
+        $path_base = implode('/', $pparts);
+
         for($i = $start; $i < $end; $i++)
         {
             if($i && $i % 10 == 0)
             {
                 MyLogger::getInstance()->log( "Generated $i keys", MyLogger::specialinfo );
             }
-            $path = $path_base . "/$i";
+            $path = $path_base . ($hardened ? "/$i'" : "/$i");
             $key = $master->derivePath($path);
             
             $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i, $path);
@@ -195,25 +206,7 @@ class WalletDerive
         $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
         return $serializer;
     }
-    
-    // key_type is one of x,y,Y,z,Z
-    private function getScriptDataFactoryForKeyType($key_type) {
-        $helper = new KeyToScriptHelper(Bitcoin::getEcAdapter());
         
-        // note: these calls are adapted from bitwasp slip132.php
-        switch( $key_type ) {
-            case 'x': $factory = $helper->getP2pkhFactory(); break;
-            case 'X': $factory = $helper->getP2shFactory($helper->getP2pkhFactory()); break;  // also xpub.  this case won't work.
-            case 'y': $factory = $helper->getP2shFactory($helper->getP2wpkhFactory()); break;
-            case 'Y': $factory = $helper->getP2shP2wshFactory($helper->getP2pkhFactory()); break;
-            case 'z': $factory = $helper->getP2wpkhFactory(); break;
-            case 'Z': $factory = $helper->getP2wshFactory($helper->getP2pkhFactory()); break;
-            default:
-                throw new Exception("Unknown key type: $key_type");
-        }
-        return $factory;
-    }
-    
     private function getSymbolAndNetwork($coin = null) {
         if(!$coin) {
             $params = $this->get_params();
@@ -275,13 +268,65 @@ class WalletDerive
     }
     
     // key_type is one of x,y,Y,z,Z
+    private function getScriptDataFactoryForKeyType($key_type) {
+        $helper = new KeyToScriptHelper(Bitcoin::getEcAdapter());
+        
+        $params = $this->get_params();
+        $addr_type = $params['addr-type'];
+        switch($addr_type) {
+            case 'legacy':      return $helper->getP2pkhFactory();
+            case 'p2sh-segwit': return $helper->getP2shFactory($helper->getP2wpkhFactory());
+            case 'bech32':      return $helper->getP2wpkhFactory();
+            case 'auto': break;  // use automatic detection based on key_type
+            default:
+                throw new Exception('Invalid value for addr_type');
+                break;
+        }
+        
+        // note: these calls are adapted from bitwasp slip132.php
+        switch( $key_type ) {
+            case 'x': $factory = $helper->getP2pkhFactory(); break;
+            case 'X': $factory = $helper->getP2shFactory($helper->getP2pkhFactory()); break;  // also xpub.  this case won't work.
+            case 'y': $factory = $helper->getP2shFactory($helper->getP2wpkhFactory()); break;
+            case 'Y': $factory = $helper->getP2shP2wshFactory($helper->getP2pkhFactory()); break;
+            case 'z': $factory = $helper->getP2wpkhFactory(); break;
+            case 'Z': $factory = $helper->getP2wshFactory($helper->getP2pkhFactory()); break;
+            default:
+                throw new Exception("Unknown key type: $key_type");
+        }
+        return $factory;
+    }
+    
+    // key_type is one of x,y,Y,z,Z
     private function getScriptPrefixForKeyType($coin, $key_type) {
         list($symbol, $net) = $this->getSymbolAndNetwork($coin);
+
+        $params = $this->get_params();
+        $addr_type = $params['addr-type'];
         
         $adapter = Bitcoin::getEcAdapter();
         $slip132 = new Slip132(new KeyToScriptHelper($adapter));
         $ext_prefixes = $this->getExtendedPrefixes($coin);
+        // this allow user to force an address type.  Typically used
+        // to generate segwit or bech32 addr from an xpub.
+        
+        if($addr_type != 'auto') {
+            $ext_prefixes['xpub'] = $ext_prefixes[$key_type . 'pub'];
+            $ext_prefixes['ypub'] = $ext_prefixes[$key_type . 'pub'];
+            $ext_prefixes['zpub'] = $ext_prefixes[$key_type . 'pub'];
+        }
         $coinPrefixes = new MultiCoinRegistry($ext_prefixes);
+        
+        switch($addr_type) {
+            case 'legacy':      return $slip132->p2pkh($coinPrefixes);
+            case 'p2sh-segwit': return $slip132->p2shP2wpkh($coinPrefixes);
+            case 'bech32':      return $slip132->p2wpkh($coinPrefixes);
+            case 'auto': break;  // use automatic detection based on key_type
+            default:
+                throw new Exception('Invalid value for addr_type');
+                break;
+        }
+        
         switch( $key_type ) {
             case 'x': $prefix = $slip132->p2pkh($coinPrefixes); break;
             case 'X': $prefix = $slip132->p2shP2pkh($coinPrefixes); break;  // also xpub.  this case won't work.

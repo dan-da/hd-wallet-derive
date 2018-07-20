@@ -8,6 +8,9 @@ Bitcoin Cash "CashAddr" and Ethereum address types are supported.
 As of version 0.4.0, segwit keys and addresses are supported for Bitcoin as
 ypub keys with p2sh style addresses and zpub keys with bech32 addresses.
 
+As of version 0.4.1, Bitcoin-core style key derivation is supported.
+[See here](./doc/bitcoin-core-hd.md).
+
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
@@ -176,6 +179,25 @@ $ ./hd-wallet-derive.php --key=zprvAfvRyooajPigxomveEuGYUPwB7KLGseATsYbGB63S6wnF
 | m/1  | bc1qjfz7nn90szmzzy38jym79p0hxr8s2c4dxhj4v0 |
 | m/2  | bc1qv23447pd7ezf589d9elcuztz3pnarf0ndk2twv |
 +------+--------------------------------------------+
+```
+
+### Derive addresses for a bitcoin-core wallet.
+
+Here we make use of *--path="m/0'/0'/x'"* to specify hardened address generation
+and *--addr-type=p2sh-segwit* to force generation of p2sh-segwit keys for an xprv key.
+
+[See here](doc/bitcoin-core-hd.md) for more docs and examples on bitcoin-core derivation.
+
+```
+$ /home/websites/hd-wallet-derive/hd-wallet-derive.php --path="m/0'/0'/x'" --addr-type=p2sh-segwit --cols=path,address,pubkey --numderive=3 --key=xprv9s21ZrQH143K3KeCJ5DMac7XqmriV7xVDDCV5MNE564bKUF6piF7JK6RWHVJMzQMUBbzxLaV9kNaRMHyjVnjNiLAq2SyvJJBs7ZUg4c9kcy -g
+
++------------+------------------------------------+--------------------------------------------------------------------+
+| path       | address                            | pubkey                                                             |
++------------+------------------------------------+--------------------------------------------------------------------+
+| m/0'/0'/0' | 3LTKKaLjr83nSCEE5gUfLzRhavU3wAdMtu | 0236ac3d8df99023e259d24754fd022af696542e25ff237bc9c835d52468b538ae |
+| m/0'/0'/1' | 34dCyjA9rEtjDEZ1AUViTGxYvmNAFA3gFH | 0365d31a6168e1187202ffb30bc80b4a788d68e87909024b624d4963ff2426b339 |
+| m/0'/0'/2' | 3FzQckSqoQNnzdGgn5sLRUgaE8Vxt4g4eo | 02446804c9bd85f0f782a0f4e52baa7398005b0ee54dc4eed23aeef64363a7ea99 |
++------------+------------------------------------+--------------------------------------------------------------------+
 ```
 
 
@@ -488,11 +510,14 @@ The report may be printed in the following formats:
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
                            
-    --mnemonic-pw=<pw>   optionally specify password for mnemonic.
+    --mnemonic-pw=<pw>   optional password for mnemonic.
     
-    --key-type           x | y | z
-                            applies to --mnemonic only.
-
+    --addr-type=<t>      legacy | p2sh-segwit | bech32 | auto
+                            default = auto  (based on key-type)
+    
+    --key-type=<t>       x | y | z
+                            default = x. applies to --mnemonic only.
+                            
     --coin=<coin>        Coin Symbol ( default = btc )
                          See --helpcoins for a list.
                          
@@ -524,12 +549,15 @@ The report may be printed in the following formats:
                          'list' prints only the first column. see --cols
                          
     --path=<path>        bip32 path to derive, relative to provided key (m).
-                           eg "", "m/0" or "m/1"
+                           ex: "", "m/0", "m/1"
                            default = "m"
                              if --mnemonic is used, then default is the
                              bip44 path to extended key, eg m/44'/0'/0'/0
                              which facilitates address derivation from
                              mnemonic phrase.
+                           note: /x' at end generates hardened addresses.
+                           ex: m/0/x'", "m/1/x'"
+                           for bitcoin-core hd-wallet use: m/0'/0'/x'
                            
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.

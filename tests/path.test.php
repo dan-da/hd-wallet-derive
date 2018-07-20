@@ -64,6 +64,15 @@ class path extends tests_common {
         $params['path'] = "1'";
         $address = $this->derive_params( $params );
         $this->eq($address, $addr_correct, "path --> 1'");
+
+        $params['path'] = "m/1'/x";
+        $address = $this->derive_params( $params );
+        $this->eq($address, $addr_correct, "path --> m/1'/x");
+        
+        $addr_correct = '1P7CWn1DE5wFR69AVK58m8ZKEEeT3ai7bR';
+        $params['path'] = "m/0'/0'/x'";
+        $address = $this->derive_params( $params );
+        $this->eq($address, $addr_correct, "path --> m/0'/0'/x'");        
     }
     
     protected function test_path_errors() {
@@ -73,7 +82,7 @@ class path extends tests_common {
         $params = ['format' => 'list', 'mnemonic' => 'lake undo sustain'];
 
         $params['path'] = 'm/a/0';
-        $expect_str = "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/]";
+        $expect_str = "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/x]";
         $this->exec_params_expect_error( $params, $expect_rc, $expect_str, 'path with invalid char' );
         
         $params['path'] = 'g';
@@ -95,6 +104,15 @@ class path extends tests_common {
         $params['path'] = "0/0''";
         $expect_str = "path parameter is invalid. It must not contain \"''\"";
         $this->exec_params_expect_error( $params, $expect_rc, $expect_str, "path with ''" );
+        
+        $params['path'] = "m/0'/x'/0";
+        $expect_str = "path parameter is invalid.  x in wrong position";
+        $this->exec_params_expect_error( $params, $expect_rc, $expect_str, "path with ''" );
+
+        $params['path'] = "m/0'/0/xx";
+        $expect_str = "path parameter is invalid.  only x or x' allowed in final path segment";
+        $this->exec_params_expect_error( $params, $expect_rc, $expect_str, "path with ''" );
+        
     }
 
     

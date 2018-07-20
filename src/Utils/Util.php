@@ -24,6 +24,7 @@ class Util
             'mnemonic:',
             'mnemonic-pw:',
             'key-type:',
+            'addr-type:',
             'outfile:',
             'numderive:', 'startindex:',
             'includeroot',
@@ -91,6 +92,12 @@ class Util
         }
         $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
 
+        $params['addr-type'] = @$params['addr-type'] ?: 'auto';
+        $allowed_addr_type = ['legacy', 'p2sh-segwit', 'bech32', 'auto'];
+        if(!in_array($params['addr-type'], $allowed_addr_type)) {
+            throw new Exception(sprintf("--addr-type must be one of: [%s]", implode('|', $allowed_addr_type)));
+        }
+        
         $keytype = @$params['key-type'] ?: 'x';
         $keytypes = ['x', 'y', 'z'];  // , 'Y', 'Z'];
         if(!in_array($keytype, $keytypes ) ) {
@@ -102,12 +109,18 @@ class Util
             if(!preg_match('/[m\d]/', $params['path'][0]) ) {
                 throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
             }
-            if(!preg_match("#^[/\d']*$#", @substr($params['path'], 1) ) ) {
-                throw new Exception( "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/]");
+            if(!preg_match("#^[/\dx']*$#", @substr($params['path'], 1) ) ) {
+                throw new Exception( "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/x]");
             }
             if(preg_match('#//#', $params['path']) ) {
                 throw new Exception( "path parameter is invalid.  It must not contain '//'");
             }
+            if(preg_match("#/[0-9']*?x[0-9']*?/#", $params['path']) ) {
+                throw new Exception( "path parameter is invalid.  x in wrong position");
+            }
+            if(preg_match("#/x[^']+.*$#", $params['path']) ) {
+                throw new Exception( "path parameter is invalid.  only x or x' allowed in final path segment");
+            }            
             if(preg_match("#/'#", $params['path']) ) {
                 throw new Exception( "path parameter is invalid. single-quote must follow an integer");
             }
@@ -170,11 +183,14 @@ class Util
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
                            
-    --mnemonic-pw=<pw>   optionally specify password for mnemonic.
+    --mnemonic-pw=<pw>   optional password for mnemonic.
     
-    --key-type           x | y | z
-                            applies to --mnemonic only.
-
+    --addr-type=<t>      legacy | p2sh-segwit | bech32 | auto
+                            default = auto  (based on key-type)
+    
+    --key-type=<t>       x | y | z
+                            default = x. applies to --mnemonic only.
+                            
     --coin=<coin>        Coin Symbol ( default = btc )
                          See --helpcoins for a list.
                          
@@ -206,12 +222,15 @@ class Util
                          'list' prints only the first column. see --cols
                          
     --path=<path>        bip32 path to derive, relative to provided key (m).
-                           eg "", "m/0" or "m/1"
+                           ex: "", "m/0", "m/1"
                            default = "m"
                              if --mnemonic is used, then default is the
                              bip44 path to extended key, eg m/44'/0'/0'/0
                              which facilitates address derivation from
                              mnemonic phrase.
+                           note: /x' at end generates hardened addresses.
+                           ex: m/0/x'", "m/1/x'"
+                           for bitcoin-core hd-wallet use: m/0'/0'/x'
                            
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
