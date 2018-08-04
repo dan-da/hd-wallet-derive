@@ -4,7 +4,7 @@ namespace App\Utils;
 
 use BitWasp\Bitcoin\Network\Network;
 use BitWasp\Bitcoin\Script\ScriptType;
-use coinParams\coinParams;
+use CoinParams\CoinParams;
 
 class FlexNetwork extends Network {
     
@@ -21,7 +21,7 @@ class FlexNetwork extends Network {
             list($coin, $network) = explode('-', $coin);
         }
         
-        $params = coinParams::get_coin_network($coin, $network);
+        $params = CoinParams::get_coin_network($coin, $network);
         $prefixes = @$params['prefixes'];
         
         // Prefer scripthash2 to scripthash. For coins like LTC that

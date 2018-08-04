@@ -15,7 +15,7 @@ use Exception;
 use App\Utils\NetworkCoinFactory;
 use App\Utils\MyLogger;
 use App\Utils\CashAddress;
-use coinParams\coinParams;
+use CoinParams\CoinParams;
 
 // For ethereum addresses
 use kornrunner\Keccak;
@@ -470,7 +470,7 @@ class WalletDerive
     }
     
     public function getCoinBip44($coin) {
-        $map = coinParams::get_all_coins();
+        $map = CoinParams::get_all_coins();
         list($symbol, $net) = explode('-', $this->coinToChain($coin));
         $bip44 = @$map[strtoupper($symbol)][$net]['prefixes']['bip44'];
         return $bip44;

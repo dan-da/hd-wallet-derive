@@ -11,13 +11,13 @@ namespace App\Utils;
 
 use BitWasp\Bitcoin\Network\Network;
 use BitWasp\Bitcoin\Network\NetworkFactory;
-use coinParams\coinParams;
+use CoinParams\CoinParams;
 
 class NetworkCoinFactory extends Network
 {
     public static function getNetworkCoinsList() {
         
-        $coins = coinParams::get_all_coins();
+        $coins = CoinParams::get_all_coins();
         
         $list = [];
         foreach($coins as $sym => $c) {
