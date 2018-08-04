@@ -45,7 +45,7 @@ abstract class tests_common extends tester\test_base {
     
     protected function exec_json($args, $expect_rc=0) {
         $output = $this->exec($args, $expect_rc);
-        return json_decode($output, true);
+        return json_decode($output, true) ?: [];
     }
     
     protected function exec($args, $expect_rc=0) {
