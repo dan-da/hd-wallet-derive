@@ -572,7 +572,7 @@ The report may be printed in the following formats:
 
 Linux Ubuntu 16.04 requirements:
 ```
-apt-get install php php-gmp php-mbstring
+apt-get install php php-gmp php-mbstring php-mcrypt
 ```
 
 Basics   ( see below for big performance speedup )
