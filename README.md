@@ -570,6 +570,11 @@ The report may be printed in the following formats:
 
 # Installation and Running.
 
+Linux Ubuntu 16.04 requirements:
+```
+apt-get install php php-gmp php-mbstring
+```
+
 Basics   ( see below for big performance speedup )
 ```
  git clone https://github.com/dan-da/hd-wallet-derive
