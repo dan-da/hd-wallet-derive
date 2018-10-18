@@ -7,7 +7,7 @@ require_once __DIR__  . '/tests_common.php';
 class errors extends tests_common {
     
     public function runtests() {
-        $this->test_unsupported_keytype();
+        // $this->test_unsupported_keytype();
         $this->test_required_args();
     }
     
