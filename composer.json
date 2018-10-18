@@ -7,7 +7,7 @@
         "php": ">=5.5",
         "dan-da/texttable-php": "1.0.3",
         "dan-da/strictmode-php": "1.0.1",
-        "dan-da/coinparams": "0.2.7",
+        "dan-da/coinparams": "0.2.9",
         "olegabr/keccak": "1.0.4"
     },
 
