@@ -143,7 +143,7 @@ class WalletDerive
             }
 
             $xprv = $key->isPrivate() ? $this->toExtendedKey($coin, $key, $network, $key_type) : null;
-            $priv_wif = $key->isPrivate() ? $key->getPrivateKey()->toWif($network) : null;
+            $priv_wif = $key->isPrivate() ? $this->serializePrivKey($symbol, $network, $key->getPrivateKey()) : null;
             $pubkey = $key->getPublicKey()->getHex();
             $pubkeyhash = $key->getPublicKey()->getPubKeyHash()->getHex();
             $xpub = $this->toExtendedKey($coin, $key->withoutPrivateKey(), $network, $key_type);
@@ -161,6 +161,12 @@ class WalletDerive
             'index' => $index,
             'path' => $path);
     }
+
+    function serializePrivKey($symbol, $network, $key) {
+        $hex = strtolower($symbol) == 'eth';
+        return $hex ? '0x' . $key->getHex() : $key->toWif($network);
+    }
+
     
     private function address($key, $network) {
         $addrCreator = new AddressCreator();
