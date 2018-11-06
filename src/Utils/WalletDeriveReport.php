@@ -85,12 +85,18 @@ class WalletDeriveReport
     /* writes out results in json (raw) format
      */
     static public function write_results_json( $fh, $results ) {
+        if(count($results) == 1) {
+            $results = $results[0];
+        }
         fwrite( $fh, json_encode( $results ) );
     }
 
     /* writes out results in jsonpretty format
      */
     static public function write_results_jsonpretty( $fh, $results ) {
+        if(count($results) == 1) {
+            $results = $results[0];
+        }
         fwrite( $fh, json_encode( $results,  JSON_PRETTY_PRINT ) . "\n" );
     }
 
