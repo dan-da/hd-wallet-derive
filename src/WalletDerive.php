@@ -377,10 +377,13 @@ class WalletDerive
     }
     
     protected function genRandomSeed($password=null) {
+        $params = $this->get_params();
+        $num_bytes = (int)($params['gen-words'] / 0.75);
+        
         // generate random mnemonic
         $random = new Random();
         $bip39 = MnemonicFactory::bip39();
-        $entropy = $random->bytes(64);
+        $entropy = $random->bytes($num_bytes);
         $mnemonic = $bip39->entropyToMnemonic($entropy);
 
         // generate seed and master priv key from mnemonic

@@ -35,6 +35,7 @@ class Util
             'bch-format:',
             'alt-extended:',
             'gen-key', 'gen-key-all',
+            'gen-words:',
             'version', 'help', 'helpcoins',
         );
 
@@ -84,6 +85,8 @@ class Util
         $loglevel = @$params['loglevel'] ?: 'specialinfo';
         MyLogger::getInstance()->set_log_level_by_name( $loglevel );
 
+        $params['gen-key'] = isset($params['gen-key']) || isset($params['gen-words']);
+        $params['gen-key-all'] = isset($params['gen-key-all']);  // hidden param, for the truly worthy who read the code.
         $key = @$params['key'];
         $mnemonic = @$params['mnemonic'];
 
@@ -91,7 +94,7 @@ class Util
             throw new Exception( "--key or --mnemonic or --gen-key must be specified." );
         }
         $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
-
+        
         $params['addr-type'] = @$params['addr-type'] ?: 'auto';
         $allowed_addr_type = ['legacy', 'p2sh-segwit', 'bech32', 'auto'];
         if(!in_array($params['addr-type'], $allowed_addr_type)) {
@@ -140,10 +143,23 @@ class Util
         $params['alt-extended'] = @$params['alt-extended'] ?: null;
         $params['startindex'] = @$params['startindex'] ?: 0;
         $params['includeroot'] = isset($params['includeroot'] );
-        $params['gen-key'] = isset($params['gen-key']);
-        $params['gen-key-all'] = isset($params['gen-key-all']);  // hidden param, for the truly worthy who read the code.
+        
+        $gen_words = (int)(@$params['gen-words'] ?: 24);
+        $allowed = self::allowed_numwords();
+        if(!in_array($gen_words, $allowed)) {
+            throw new Exception("--gen-words must be one of " . implode(', ', $allowed));
+        }
+        $params['gen-words'] = $gen_words;
 
         return [$params, $success];
+    }
+    
+    public static function allowed_numwords() {
+        $allowed = [];
+        for($i = 12; $i <= 48; $i += 3) {
+            $allowed[] = $i;
+        }
+        return $allowed;
     }
 
     /**
@@ -166,6 +182,7 @@ class Util
         $levels = MyLogger::getInstance()->get_level_map();
         $allcols = implode(',', WalletDerive::all_cols() );
         $defaultcols = implode(',', WalletDerive::default_cols() );
+        $allowed_numwords = implode(', ', self::allowed_numwords());
         
         $loglevels = implode(',', array_values( $levels ));
 
@@ -234,6 +251,9 @@ class Util
                            
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
+    --gen-words=<n>     num words to generate. implies --gen-key.
+                           one of: [$allowed_numwords]
+                           default = 24.
     
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  $loglevels
