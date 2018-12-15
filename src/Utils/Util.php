@@ -90,7 +90,7 @@ class Util
         $key = @$params['key'];
         $mnemonic = @$params['mnemonic'];
 
-        if( !$key && !$mnemonic && !isset($params['gen-key'])) {
+        if( !$key && !$mnemonic && !$params['gen-key']) {
             throw new Exception( "--key or --mnemonic or --gen-key must be specified." );
         }
         $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
