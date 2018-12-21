@@ -1,5 +1,48 @@
-# hd-wallet-derive
+**hd-wallet-derive is a command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins. Derivation reports show privkey (wif encoded), xprv, xpub, and address.**
 
+Table of Contents
+=================
+
+   * [hd-wallet-derive]()
+   * [Let's see some examples.]()
+      * [using a private (xprv) key, with default columns]()
+      * [Deriving change addresses and showing all columns.]()
+      * [Derive addresses from bip39 mnemonic seed words.]()
+         * [Without a password]()
+         * [With a password]()
+         * [Using ypub extended key for segwit p2sh addresses.]()
+         * [Using zpub extended key for segwit bech32 addresses.]()
+      * [Derive addresses from xpub key]()
+      * [We can derive segwit keys]()
+         * [ypub / p2sh]()
+         * [zpub / bech32]()
+         * [Derive addresses for a bitcoin-core wallet.]()
+      * [We can easily change up the columns in whatever order we want.]()
+      * [Let's find what altcoins are supported.]()
+      * [We can view altcoin addresses.]()
+      * [We can easily generate a new random master key, seed and extended keys for any coin.]()
+      * [Key generation includes segwit keys and their paths.]()
+      * [We can get results in a variety of additional formats]()
+         * [simple list]()
+         * [json]()
+         * [csv]()
+   * [How address derivation works]()
+   * [Segwit notes]()
+   * [Litecoin notes]()
+      * [xpub vs Ltub keys.]()
+      * [Here we see Mtub key and new style 'M' p2sh address.]()
+      * [And a ttub testnet key]()
+   * [Privacy and Security implications]()
+   * [Use at your own risk.]()
+   * [Output formats]()
+   * [Usage]()
+   * [Installation and Running.]()
+      * [install secp256kp1 php extension for big speedup]()
+   * [Thanks]()
+   * [Todos]()
+
+
+# hd-wallet-derive
 A command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins.
 
 As of version 0.3.2, over 300 altcoins are available, 97 with bip44 path information.
