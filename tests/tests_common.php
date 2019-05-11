@@ -10,14 +10,14 @@ use tester;
 abstract class tests_common extends tester\test_base {
     protected $last_cmd = null;
     
-    protected function derive_params($params, $expect_rc=0) {
+    protected function derive_params($params, $expect_rc=0, $label = '') {
         return !@$params['format'] || in_array($params['format'], ['json', 'jsonpretty']) ?
-            $this->exec_json($this->gen_args($params)) :
-            $this->exec($this->gen_args($params), $expect_rc);
+            $this->exec_json($this->gen_args($params), $expect_rc, $label) :
+            $this->exec($this->gen_args($params), $expect_rc, $label);
     }
     
     protected function exec_params_expect_error($params, $expect_rc, $expect_str, $label='error message') {
-        $output = $this->derive_params($params, $expect_rc);
+        $output = $this->derive_params($params, $expect_rc, $label);
         if( $expect_str ) {
             $this->contains( $output, $expect_str, $label );
         }
@@ -43,12 +43,12 @@ abstract class tests_common extends tester\test_base {
         return $argbuf;
     }
     
-    protected function exec_json($args, $expect_rc=0) {
-        $output = $this->exec($args, $expect_rc);
+    protected function exec_json($args, $expect_rc=0, $label) {
+        $output = $this->exec($args, $expect_rc, $label);
         return json_decode($output, true) ?: [];
     }
     
-    protected function exec($args, $expect_rc=0) {
+    protected function exec($args, $expect_rc=0, $label) {
         
         $prog = realpath(__DIR__ . '/../hd-wallet-derive.php');
         $cmd = sprintf('%s %s 2>&1', $prog, $args);
@@ -56,13 +56,13 @@ abstract class tests_common extends tester\test_base {
         $this->last_cmd = $cmd;
         exec($cmd, $output, $rc);
         
-        if( $expect_rc != 0 || $rc != $expect_rc) {
-            $this->eq($rc, $expect_rc, 'command exit code');
+        if( $rc != $expect_rc) {
+            $this->eq($rc, $expect_rc, $label . ' : unexpected command exit code.');
         }
         
-        if($rc == 0 && $rc != $expect_rc) {
-            throw new \Exception("command failed with exit code " . $rc . "\n  command was:\n\n\n\n$cmd", $rc);
-        }
+        // if($rc == 0 && $rc != $expect_rc) {
+        //    throw new \Exception("command failed with exit code " . $rc . "\n  command was:\n\n\n\n$cmd", $rc);
+        // }
         return trim(implode("\n", $output));
     }
     
