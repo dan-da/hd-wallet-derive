@@ -603,10 +603,14 @@ The report may be printed in the following formats:
                            
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
+    --gen-words=<n>     num words to generate. implies --gen-key.
+                           one of: [12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
+                           default = 24.
     
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  debug,info,specialinfo,warning,exception,fatalerror
                           default = info
+    
 ```
 
 
