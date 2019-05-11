@@ -118,11 +118,8 @@ class Util
             if(preg_match('#//#', $params['path']) ) {
                 throw new Exception( "path parameter is invalid.  It must not contain '//'");
             }
-            if(preg_match("#/[0-9']*?x[0-9']*?/#", $params['path']) ) {
-                throw new Exception( "path parameter is invalid.  x in wrong position");
-            }
-            if(preg_match("#/x[^']+.*$#", $params['path']) ) {
-                throw new Exception( "path parameter is invalid.  only x or x' allowed in final path segment");
+            if(preg_match("#/.*x.*x#", $params['path']) ) {
+                throw new Exception( "path parameter is invalid. x may only be used once");
             }            
             if(preg_match("#/'#", $params['path']) ) {
                 throw new Exception( "path parameter is invalid. single-quote must follow an integer");

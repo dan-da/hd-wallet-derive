@@ -104,19 +104,27 @@ class WalletDerive
         // Allow paths to end with i or i'.
         // i' specifies that addresses should be hardened.
         $pparts = explode('/', $path_base);
-        $hardened = end($pparts) == "x'";
-        if(end($pparts)[0] == 'x') {
-            array_pop($pparts);
+        
+        $iter_part = null;
+        foreach($pparts as $idx => $pp) {
+            if($pp[0] == 'x') {
+                $iter_part = $idx;
+            }
         }
-        $path_base = implode('/', $pparts);
-
+        if(!$iter_part) {
+            $iter_part = count($pparts);
+            $pparts[] = 'x';
+        }
+        $path_normal = implode('/', $pparts);
+        $path_mask = str_replace('x', '%d', $path_normal);
+        
         for($i = $start; $i < $end; $i++)
         {
             if($i && $i % 10 == 0)
             {
                 MyLogger::getInstance()->log( "Generated $i keys", MyLogger::specialinfo );
             }
-            $path = $path_base . ($hardened ? "/$i'" : "/$i");
+            $path = sprintf($path_mask, $i);
             $key = $master->derivePath($path);
             
             $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i, $path);
