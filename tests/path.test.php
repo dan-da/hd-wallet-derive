@@ -88,8 +88,8 @@ class path extends tests_common {
         // check xprv derivation results in correct addresses.
         $params = ['format' => 'list', 'mnemonic' => 'lake undo sustain'];
 
-        $params['path'] = 'm/a/0';
-        $expect_str = "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/x]";
+        $params['path'] = 'm/q/0';
+        $expect_str = "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/xcva]";
         $this->exec_params_expect_error( $params, $expect_rc, $expect_str, 'path with invalid char' );
         
         $params['path'] = 'g';

@@ -11,6 +11,7 @@ namespace App\Utils;
 
 use Exception;
 use App\WalletDerive;
+use App\Utils\PathPresets;
 
 
 class Util
@@ -36,7 +37,8 @@ class Util
             'alt-extended:',
             'gen-key', 'gen-key-all',
             'gen-words:',
-            'version', 'help', 'helpcoins',
+            'version', 'help', 'help-coins',
+            'preset:', 'path-change', 'path-account:', 'help-presets',
         );
 
         $params = getopt( 'g', $paramsArray);
@@ -60,11 +62,17 @@ class Util
         }
 
         // format and cols must be set prior to calling ::printHelpCoins()
-        $params['format'] = @$params['format'] ?: 'txt';
         $params['cols'] = @$params['cols'] ?: 'all';
+        $params['cols'] = static::getCols( $params );
+        $params['format'] = @$params['format'] ?: 'txt';
         
-        if(isset($params['helpcoins'])) {
+        if(isset($params['help-coins'])) {
             static::printHelpCoins( $params );
+            return [$params, 1];
+        }
+
+        if(isset($params['help-presets'])) {
+            static::printHelpPresets( $params );
             return [$params, 1];
         }
         
@@ -108,18 +116,30 @@ class Util
         }
         $params['key-type'] = $keytype;
         
+        if( @$params['path'] && @$params['preset']) {
+            throw new Exception ("--path and --preset are mutually exclusive");
+        }
+        
+        if( @$params['preset']) {
+            $preset = PathPresets::getPreset($params['preset']);
+            $params['path'] = $preset->getPath();
+        }
+        
         if( @$params['path'] ) {
             if(!preg_match('/[m\d]/', $params['path'][0]) ) {
                 throw new Exception( "path parameter is invalid.  It should begin with m or an integer number.");
             }
-            if(!preg_match("#^[/\dx']*$#", @substr($params['path'], 1) ) ) {
-                throw new Exception( "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/x]");
+            if(!preg_match("#^[/\dxcva']*$#", @substr($params['path'], 1) ) ) {
+                throw new Exception( "path parameter is invalid.  It should begin with m or an integer and contain only [0-9'/xcva]");
             }
             if(preg_match('#//#', $params['path']) ) {
                 throw new Exception( "path parameter is invalid.  It must not contain '//'");
             }
             if(preg_match("#/.*x.*x#", $params['path']) ) {
                 throw new Exception( "path parameter is invalid. x may only be used once");
+            }            
+            if(preg_match("#/.*y.*y#", $params['path']) ) {
+                throw new Exception( "path parameter is invalid. y may only be used once");
             }            
             if(preg_match("#/'#", $params['path']) ) {
                 throw new Exception( "path parameter is invalid. single-quote must follow an integer");
@@ -130,7 +150,6 @@ class Util
             $params['path'] = rtrim($params['path'], '/');  // trim any trailing path separator.
         }
 
-        $params['cols'] = static::getCols( $params );
         if ( !isset( $params['path'] )) {
             $params['path'] = 'm';
         }
@@ -140,6 +159,8 @@ class Util
         $params['alt-extended'] = @$params['alt-extended'] ?: null;
         $params['startindex'] = @$params['startindex'] ?: 0;
         $params['includeroot'] = isset($params['includeroot'] );
+        $params['path-change'] = isset($params['path-change']) ? 1 : 0;
+        $params['path-account'] = @$params['path-account'] ?: 0;
         
         $gen_words = (int)(@$params['gen-words'] ?: 24);
         $allowed = self::allowed_numwords();
@@ -245,9 +266,21 @@ class Util
                            note: /x' generates hardened addrs; requires xprv.
                            note: /x is implicit; m/x is equivalent to m.
                            ex: m/0/x'", "m/1/x'"
-                           for bitcoin-core hd-wallet use: m/0'/0'/x'
-                           for ledger-live use m/44'/60'/x'/0/0
-                           for trezor, mew use m/44'/60'/0'/0
+                           for bitcoin-core hd-wallet use: m/0'/y'/x'
+                           
+    --preset=<id>       wallet path preset identifier.
+                          bip44, bitcoin-core, ledger-live, etc.
+                          Use --help-presets for full list.
+                          note: --preset and --path are mutually exclusive.
+                          
+    --path-change       any 'v' in the path will be replaced with '1' instead of '0'.
+                         (for generating change addresses)
+                          
+    --path-account=<n>  any 'a' in the path will be replaced by integer <n>.
+                         (for multi-account wallets)
+                         default = 0.
+    
+    --help-presets      list all available presets.
                                                     
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
@@ -272,23 +305,55 @@ END;
 
         $data = [];
         foreach($allcoins as $k => $v) {
-            $data[] = ['Symbol' => $k,
-                       'Coin / Network' => $v['name'],
-                       'Bip44' => $v['bip44']];
+            $data[] = ['symbol' => $k,
+                       'coin / network' => $v['name'],
+                       'bip44' => $v['bip44']];
         }
         
         $summary = [];
-        WalletDeriveReport::print_results_worker($summary, $data, null, $params['format']);
+        WalletDeriveReport::printResults($params, $data);
         echo "\n\n";
     }
 
+    public static function printHelpPresets( $params ) {
+        $presets = PathPresets::getAllPresets();
+
+        $data = [];
+        foreach($presets as $v) {
+            $data[] = ['id' => $v->getID(),
+                       'path' => $v->getPath(),
+                       'wallet' => $v->getWalletSoftwareName(),
+                       'version' => $v->getWalletSoftwareVersionInfo(),
+                       'note' => $v->getNote()];
+        }
+        
+        usort($data, function($a, $b) { return strcmp($a['id'], $b['id']); });
+        
+        $summary = [];
+        WalletDeriveReport::printResults($params, $data);
+        echo "\n\n";
+    }
+    
+    
     /* parses the --cols argument and returns an array of columns.
      */
     public static function getCols( $params )
     {
         $arg = static::stripWhitespace( @$params['cols'] ?: null );
 
-        $allcols = $params['gen-key'] ? WalletDerive::all_cols_genkey() : WalletDerive::all_cols();
+        $allcols = [];
+        if( isset($params['gen-key'])) {
+            $allcols = WalletDerive::all_cols_genkey();
+        }
+        else if( isset($params['help-presets'])) {
+            $allcols = ['id', 'path', 'wallet', 'version', 'note'];
+        }
+        else if( isset($params['help-coins'])) {
+            $allcols = ['symbol', 'coin / network', 'bip44'];
+        }
+        else {
+            $allcols = WalletDerive::all_cols();
+        }
 
         if( $arg == 'all' ) {
             $cols = $allcols;
@@ -299,7 +364,7 @@ END;
         else {
             $cols = explode( ',', $arg );
             foreach( $cols as $c ) {
-                if( !in_array($c, $allcols) )
+                if( count($allcols) && !in_array($c, $allcols) )
                 {
                     throw new Exception( "'$c' is not a known report column.", 2 );
                 }

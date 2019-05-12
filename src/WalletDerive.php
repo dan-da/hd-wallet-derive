@@ -79,11 +79,12 @@ class WalletDerive
         $coin = $params['coin'];
         list($symbol) = explode('-', $coin);
         $addrs = array();
+
+        $bip44_coin = $this->getCoinBip44($coin);  // bip44/slip-0044 coin identifier
         
         $networkCoinFactory = new NetworkCoinFactory();
         $network = $networkCoinFactory->getNetworkCoinInstance($coin);
         Bitcoin::setNetwork($network);
-        
         $key_type = $this->getKeyTypeFromCoinAndKey($coin, $key);
 
         $master = $this->fromExtended($coin, $key, $network, $key_type);
@@ -117,6 +118,16 @@ class WalletDerive
         }
         $path_normal = implode('/', $pparts);
         $path_mask = str_replace('x', '%d', $path_normal);
+        if(strpos($path_mask, 'c') !== false) {
+            if( is_int($bip44_coin) ) {
+                $path_mask = str_replace('c', $bip44_coin, $path_mask);  // auto-insert bip44 coin-type if requested via 'c'.
+            }
+            else {
+                throw new Exception("'c' is present in path but Bip44 coin type is undefined for $coin");
+            }
+        }
+        $path_mask = str_replace('v', @$params['path-change'], $path_mask);
+        $path_mask = str_replace('a', @$params['path-account'], $path_mask);
         
         for($i = $start; $i < $end; $i++)
         {

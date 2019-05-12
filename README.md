@@ -4,42 +4,50 @@
 =====================
 
 - [hd-wallet-derive](#hd-wallet-derive)
-- [Let's see some examples.](#lets-see-some-examples)
-  - [using a private (xprv) key, with default columns](#using-a-private-xprv-key-with-default-columns)
-  - [Deriving change addresses and showing all columns.](#deriving-change-addresses-and-showing-all-columns)
-  - [Derive addresses from bip39 mnemonic seed words.](#derive-addresses-from-bip39-mnemonic-seed-words)
-    - [Without a password](#without-a-password)
-    - [With a password](#with-a-password)
-    - [Using ypub extended key for segwit p2sh addresses.](#using-ypub-extended-key-for-segwit-p2sh-addresses)
-    - [Using zpub extended key for segwit bech32 addresses.](#using-zpub-extended-key-for-segwit-bech32-addresses)
-  - [Derive addresses from xpub key](#derive-addresses-from-xpub-key)
-  - [We can derive segwit keys](#we-can-derive-segwit-keys)
-    - [ypub / p2sh](#ypub-p2sh)
-    - [zpub / bech32](#zpub-bech32)
-    - [Derive addresses for a bitcoin-core wallet.](#derive-addresses-for-a-bitcoin-core-wallet)
-  - [We can easily change up the columns in whatever order we want.](#we-can-easily-change-up-the-columns-in-whatever-order-we-want)
-  - [Let's find what altcoins are supported.](#lets-find-what-altcoins-are-supported)
-  - [We can view altcoin addresses.](#we-can-view-altcoin-addresses)
-  - [We can easily generate a new random master key, seed and extended keys for any coin.](#we-can-easily-generate-a-new-random-master-key-seed-and-extended-keys-for-any-coin)
-  - [Key generation includes segwit keys and their paths.](#key-generation-includes-segwit-keys-and-their-paths)
-  - [We can get results in a variety of additional formats](#we-can-get-results-in-a-variety-of-additional-formats)
-    - [simple list](#simple-list)
-    - [json](#json)
-    - [csv](#csv)
+- [Path Preset examples.](#path-preset-examples)
+  * [Obtaining a list of preset paths.](#obtaining-a-list-of-preset-paths)
+  * [Deriving addresses for bitcoin-core using preset path.](#deriving-addresses-for-bitcoin-core-using-preset-path)
+  * [Deriving Change addresses for bitcoin-core using preset path.](#deriving-change-addresses-for-bitcoin-core-using-preset-path)
+- [Custom Path examples.](#custom-path-examples)
+  * [using a private (xprv) key, with default columns](#using-a-private--xprv--key--with-default-columns)
+  * [Deriving change addresses and showing all columns.](#deriving-change-addresses-and-showing-all-columns)
+  * [Derive addresses from bip39 mnemonic seed words.](#derive-addresses-from-bip39-mnemonic-seed-words)
+    + [Without a password](#without-a-password)
+    + [With a password](#with-a-password)
+    + [Using ypub extended key for segwit p2sh addresses.](#using-ypub-extended-key-for-segwit-p2sh-addresses)
+    + [Using zpub extended key for segwit bech32 addresses.](#using-zpub-extended-key-for-segwit-bech32-addresses)
+  * [Derive addresses from xpub key](#derive-addresses-from-xpub-key)
+  * [We can derive segwit keys](#we-can-derive-segwit-keys)
+    + [ypub / p2sh](#ypub---p2sh)
+    + [zpub / bech32](#zpub---bech32)
+    + [Derive addresses for a bitcoin-core wallet.](#derive-addresses-for-a-bitcoin-core-wallet)
+  * [We can easily change up the columns in whatever order we want.](#we-can-easily-change-up-the-columns-in-whatever-order-we-want)
+  * [Let's find what altcoins are supported.](#let-s-find-what-altcoins-are-supported)
+  * [We can view altcoin addresses.](#we-can-view-altcoin-addresses)
+  * [We can easily generate a new random master key, seed and extended keys for any coin.](#we-can-easily-generate-a-new-random-master-key--seed-and-extended-keys-for-any-coin)
+  * [Key generation includes segwit keys and their paths.](#key-generation-includes-segwit-keys-and-their-paths)
+  * [We can get results in a variety of additional formats](#we-can-get-results-in-a-variety-of-additional-formats)
+    + [simple list](#simple-list)
+    + [json](#json)
+    + [csv](#csv)
 - [How address derivation works](#how-address-derivation-works)
+- [Path Presets](#path-presets)
+- [Path variables](#path-variables)
+    + [Variables](#variables)
 - [Segwit notes](#segwit-notes)
 - [Litecoin notes](#litecoin-notes)
-  - [xpub vs Ltub keys.](#xpub-vs-ltub-keys)
-  - [Here we see Mtub key and new style 'M' p2sh address.](#here-we-see-mtub-key-and-new-style-m-p2sh-address)
-  - [And a ttub testnet key](#and-a-ttub-testnet-key)
+  * [xpub vs Ltub keys.](#xpub-vs-ltub-keys)
+  * [Here we see Mtub key and new style 'M' p2sh address.](#here-we-see-mtub-key-and-new-style--m--p2sh-address)
+  * [And a ttub testnet key](#and-a-ttub-testnet-key)
 - [Privacy and Security implications](#privacy-and-security-implications)
 - [Use at your own risk.](#use-at-your-own-risk)
 - [Output formats](#output-formats)
 - [Usage](#usage)
 - [Installation and Running.](#installation-and-running)
-  - [install secp256kp1 php extension for big speedup](#install-secp256kp1-php-extension-for-big-speedup)
+  * [install secp256kp1 php extension for big speedup](#install-secp256kp1-php-extension-for-big-speedup)
 - [Thanks](#thanks)
 - [Todos](#todos)
+
 
 # hd-wallet-derive
 A command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins.
@@ -52,6 +60,8 @@ ypub keys with p2sh style addresses and zpub keys with bech32 addresses.
 
 As of version 0.4.1, Bitcoin-core style key derivation is supported.
 [See here](./doc/bitcoin-core-hd.md).
+
+As of version 0.4.3, [Preset paths](#path-presets) are available for common wallet software.
 
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
@@ -67,11 +77,99 @@ re-ordered via command-line.
 
 See also: [hd-wallet-addrs](https://github.com/dan-da/hd-wallet-addrs) -- a tool for finding hd-wallet addresses that have received funds.
 
-# Let's see some examples.
+# Path Preset examples.
+
+## Obtaining a list of preset paths.
+
+Let's say we want to derive addresses for bitcoin-core software.  First, we need to find out the preset
+identifier for this software.
+
+```
+$ ./hd-wallet-derive.php --help-presets | head -n 7
++-------------------------+----------------------+-------------------------+------------------+---------------------------+
+| id                      | path                 | wallet                  | version          | note                      |
++-------------------------+----------------------+-------------------------+------------------+---------------------------+
+| bip44                   | m/44'/c'/a'/v/x      | Bip44 Compat            | n/a              | Bip44                     |
+| bip49                   | m/49'/c'/a'/v/x      | Bip49 Compat            | n/a              | Bip49                     |
+| bip84                   | m/84'/c'/a'/v/x      | Bip84 Compat            | n/a              | Bip84                     |
+| bitcoincore             | m/a'/v'/x'           | Bitcoin Core            | v0.13 and above. | Bip32 fully hardened      |
+```
+
+See [Path Presets](#path-presets).
+
+If we want only the ids, we could use the command:
+
+```
+$ ./hd-wallet-derive.php --help-presets --format=list
+bip44
+bip49
+bip84
+bitcoincore
+bither
+breadwallet
+coinomi
+coinomi_bech32
+coinomi_p2sh
+copay
+copay_hardware_multisig
+copay_legacy
+electrum
+electrum_legacy
+electrum_legacy_multi
+hive
+jaxx
+ledgerlive
+multibit_hd
+multibit_hd_44
+mycelium
+samourai
+samourai_bech32
+samourai_p2sh
+trezor
+wasabi
+```
+    
+## Deriving addresses for bitcoin-core using preset path.
+
+Using a preset means that we do not need to know the bip32 path.  We can do:
+
+```
+$ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --numderive=3 --preset=bitcoincore --cols=path,address
+
++------------+------------------------------------+
+| path       | address                            |
++------------+------------------------------------+
+| m/0'/0'/0' | 1JsH5tzm2bphJySSLJ13AbFGP8KqJBYvG7 |
+| m/0'/0'/1' | 19in8KwQy2waqzogwnVRvh2gt7EkHDGtwg |
+| m/0'/0'/2' | 1CMc7jzi6ewKRzBNSCMkYzY3PU13ck6bxQ |
++------------+------------------------------------+
+```
+
+## Deriving Change addresses for bitcoin-core using preset path.
+
+We can use the --path-change flag for this.  requires a preset
+with variable 'v' present in the path.
+
+```
+$ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c --numderive=3 --preset=bitcoincore --cols=path,address --path-change
+
++------------+------------------------------------+
+| path       | address                            |
++------------+------------------------------------+
+| m/0'/1'/0' | 1B6q1KTyaa9yLHV2HTZC1rZaSKMG8KNqsp |
+| m/0'/1'/1' | 15RF1R9ZaSqgtaTVBDm1ySU5MQ6dZeTpZf |
+| m/0'/1'/2' | 1DpzhgrgWuRSnQjvLiZHMG2TAjs86znvjj |
++------------+------------------------------------+ 
+```
+
+Notice that that 2nd field has changed from 0' to 1'.
+
+
+# Custom Path examples.
 
 ## using a private (xprv) key, with default columns
 
-Here we do not specify a bip32 path, so addresses will be derived directly from
+Here we do not specify a bip32 path or a preset, so addresses will be derived directly from
 this key.
 
 ```
@@ -387,6 +485,59 @@ change addresses. Expert users may have trickier uses for this flag.
 
 Due to the simplicity of this approach, the tool does not need to know or care about specific
 bip32 path layouts such as bip44, bip45, etc.
+
+
+# Path Presets
+
+Path presets are available for standardized paths and commonly used Bitcoin Wallet software.
+
+A list of the presets can be obtained by running
+
+    $ ./hd-wallet-derive.php --help-presets
+    
+Or [view them online](./doc/wallet-bip32-path-presets.md).
+
+--path and --preset are mutually exlusive, so use one or the other.
+
+
+# Path variables
+
+Some wallet software supports features such as multiple accounts or even multiple
+cryptocurrencies that share a common bip32 path structure.  The mostly communly used structure
+is Bip44, so we will use that as an example.
+
+Bip44 has the structure:
+
+    m / purpose' / coin_type' / account' / change / address_index
+    
+A valid Bip44 path used to generate an address might look like:
+
+    m/44'/0/0/0/0
+    
+hd-wallet-derive accepts one-letter variables with special meanings that can be
+substituted in a path.
+
+These variables are used in path presets and variable values can be defined with flags
+--coin, --path-account and --path-change
+
+### Variables
+
+| var | meaning                                    | flag to fill it in  | default           |
+|-----|--------------------------------------------|---------------------|-------------------|
+| c   | coin identifier, from --help-coins         | --coin=\<id>        | 0 (btc)           |
+| a   | account                                    | --path-account=\<n> | 0 (first account) | 
+| v   | visibility.  internal/external, aka change | --path-change       | 0 ( external )    |
+| x   | the field to increment / iterate.          | none                | n/a               |
+
+
+Normal usage will be to choose a preset with --preset=\<id> and then use
+one or more of the flags to override default for any included variables.
+
+Use the --help-presets flag to find path definitions for your wallet software.
+
+note: It is possible to use variables in paths passed via the --path argument, but you
+shouldn't need to do this as you can directly manipulate every field when using a custom path.
+
 
 # Segwit notes
 
