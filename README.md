@@ -589,7 +589,7 @@ The report may be printed in the following formats:
                          only works when outfile is specified.
                          
                          'list' prints only the first column. see --cols
-                         
+
     --path=<path>        bip32 path to derive, relative to provided key (m).
                            ex: "", "m/0", "m/1"
                            default = "m"
@@ -597,10 +597,13 @@ The report may be printed in the following formats:
                              bip44 path to extended key, eg m/44'/0'/0'/0
                              which facilitates address derivation from
                              mnemonic phrase.
-                           note: /x' at end generates hardened addresses.
+                           note: /x' generates hardened addrs; requires xprv.
+                           note: /x is implicit; m/x is equivalent to m.
                            ex: m/0/x'", "m/1/x'"
                            for bitcoin-core hd-wallet use: m/0'/0'/x'
-                           
+                           for ledger-live use m/44'/60'/x'/0/0
+                           for trezor, mew use m/44'/60'/0'/0
+
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
     --gen-words=<n>     num words to generate. implies --gen-key.
