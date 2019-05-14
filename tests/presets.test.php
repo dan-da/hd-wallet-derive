@@ -22,6 +22,7 @@ class presets extends tests_common {
         $addr_correct = '14QYcbc8bS5ADCg3qpWPYCtrPpiVVsQib9';
 
         $map = [
+                'bip32' => '1HKpen4TCPVueNkkkJVpHhNrYew6zmu9H9',
                 'bip44' => '13A2wd2H4vsyjHXjvDQLZtxy4b3pStUwjo',
                 'bip49' => '3LR3HZCi5GjWx88ixAr7D1eFVi3Cq7Vxip',
                 'bip84' => 'bc1qrmp525wswv0djeqtdfpfu9uh7qhmt6lrrcpu0s',
@@ -67,6 +68,7 @@ class presets extends tests_common {
             }
             
             $address = $this->derive_params( $params );
+//	    echo "                '$id' => '$address',\n";
             $this->eq($address, $addr_correct, 'preset: ' . $id);
         }
     }
