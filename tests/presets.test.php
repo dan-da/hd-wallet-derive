@@ -8,6 +8,7 @@ class presets extends tests_common {
     
     public function runtests() {
         $this->test_valid();
+        $this->test_mnemonic_valid();
         $this->test_errors();
     }
 
@@ -72,6 +73,32 @@ class presets extends tests_common {
             $this->eq($address, $addr_correct, 'preset: ' . $id);
         }
     }
+
+    protected function test_mnemonic_valid() {
+        // check xprv derivation results in correct addresses.
+        $params = [
+            'format' => 'list',
+            'cols'   => 'address',
+            'numderive'   => '1',
+            'mnemonic' => 'nothing edit remember box goddess local cabin term social destroy inner universe candy maze horse zone step direct captain patch cream output large ticket early cactus clap curious link quarter stamp guitar bone believe subject lawsuit funny infant creek width trigger talent kick payment habit example game shrimp',
+        ];
+        $addr_correct = '14QYcbc8bS5ADCg3qpWPYCtrPpiVVsQib9';
+
+        $map = [
+                'bip32' => '1D1XQGzskxM6GseAAV245VZrPp5gJSoQkd',
+                'bip44' => '1JxwtAMZYMiT2pR6DCRDBpqsoZ4FdTxoSS',
+                ];
+        
+        foreach($map as $id => $addr_correct) {
+            $params['preset'] = $id;
+            $params['addr-type'] = 'auto';
+            
+            $address = $this->derive_params( $params );
+	    echo "                '$id' => '$address',\n";
+            $this->eq($address, $addr_correct, 'preset applied to mnemonic: ' . $id);
+        }
+    }
+
     
     protected function test_errors() {
         $expect_rc = 1;        

@@ -51,7 +51,7 @@ function main()
         }
 
         // Key derived from mnemonic if mnemonic is choosen
-        if( !@$params['key'] && @$params['mnemonic'] && !@$orig_params['path']) {
+        if( !@$params['key'] && @$params['mnemonic'] && !@$orig_params['path'] && !@$orig_params['preset']) {
             $path = $walletDerive->getCoinBip44ExtKeyPathPurposeByKeyType($params['coin'], $params['key-type']);
             if($path) {
                 $params['path'] = $path;
