@@ -41,7 +41,7 @@ class presets extends tests_common {
                 'electrum_legacy_multi' => '1KXfyQubJA5db6RzsEwbK2TmwtKXKQn932',
                 'hive' => '1HKpen4TCPVueNkkkJVpHhNrYew6zmu9H9',
                 'jaxx' => '13A2wd2H4vsyjHXjvDQLZtxy4b3pStUwjo',
-                'ledgerlive' => '1NkEWQHq3PQtaepGDEwo4miGK6vBAhrCov',
+                'ledgerlive' => '13A2wd2H4vsyjHXjvDQLZtxy4b3pStUwjo',
                 'multibit_hd' => '1HKpen4TCPVueNkkkJVpHhNrYew6zmu9H9',
                 'multibit_hd_44' => '13A2wd2H4vsyjHXjvDQLZtxy4b3pStUwjo',
                 'mycelium' => '13A2wd2H4vsyjHXjvDQLZtxy4b3pStUwjo',
@@ -94,7 +94,7 @@ class presets extends tests_common {
             $params['addr-type'] = 'auto';
             
             $address = $this->derive_params( $params );
-	    echo "                '$id' => '$address',\n";
+//	    echo "                '$id' => '$address',\n";
             $this->eq($address, $addr_correct, 'preset applied to mnemonic: ' . $id);
         }
     }

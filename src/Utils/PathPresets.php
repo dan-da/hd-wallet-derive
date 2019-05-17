@@ -69,7 +69,7 @@ class PathPreset_ledgerlive {
     }
         
     public function getPath() : string {
-        return "m/44'/c'/x'/v/0'";
+        return "m/44'/c'/x'/v/0";
     }
     
     public function getWalletSoftwareName() : string {
