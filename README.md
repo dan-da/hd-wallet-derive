@@ -128,7 +128,7 @@ samourai_p2sh
 trezor
 wasabi
 ```
-    
+
 ## Deriving addresses for bitcoin-core using preset path.
 
 Using a preset means that we do not need to know the bip32 path.  We can do:
@@ -159,7 +159,7 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 | m/0'/1'/0' | 1B6q1KTyaa9yLHV2HTZC1rZaSKMG8KNqsp |
 | m/0'/1'/1' | 15RF1R9ZaSqgtaTVBDm1ySU5MQ6dZeTpZf |
 | m/0'/1'/2' | 1DpzhgrgWuRSnQjvLiZHMG2TAjs86znvjj |
-+------------+------------------------------------+ 
++------------+------------------------------------+
 ```
 
 Notice that that 2nd field has changed from 0' to 1'.
@@ -360,7 +360,7 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 ## Let's find what altcoins are supported.
 
 ```
-$ ./hd-wallet-derive.php --helpcoins
+$ ./hd-wallet-derive.php --help-coins
 +--------------------+------------------------------------+
 | Symbol             | Coin / Network                     |
 +--------------------+------------------------------------+
@@ -494,7 +494,7 @@ Path presets are available for standardized paths and commonly used Bitcoin Wall
 A list of the presets can be obtained by running
 
     $ ./hd-wallet-derive.php --help-presets
-    
+
 Or [view them online](./doc/wallet-bip32-path-presets.md).
 
 --path and --preset are mutually exlusive, so use one or the other.
@@ -509,11 +509,11 @@ is Bip44, so we will use that as an example.
 Bip44 has the structure:
 
     m / purpose' / coin_type' / account' / change / address_index
-    
+
 A valid Bip44 path used to generate an address might look like:
 
     m/44'/0/0/0/0
-    
+
 hd-wallet-derive accepts one-letter variables with special meanings that can be
 substituted in a path.
 
@@ -525,7 +525,7 @@ These variables are used in path presets and variable values can be defined with
 | var | meaning                                    | flag to fill it in  | default           |
 |-----|--------------------------------------------|---------------------|-------------------|
 | c   | coin identifier, from --help-coins         | --coin=\<id>        | 0 (btc)           |
-| a   | account                                    | --path-account=\<n> | 0 (first account) | 
+| a   | account                                    | --path-account=\<n> | 0 (first account) |
 | v   | visibility.  internal/external, aka change | --path-change       | 0 ( external )    |
 | x   | the field to increment / iterate.          | none                | n/a               |
 
@@ -698,29 +698,29 @@ The report may be printed in the following formats:
    Options:
 
     -g                   go!  ( required )
-        
+
     --key=<key>          xpriv or xpub key
     --mnemonic=<words>   bip39 seed words
                            note: either key or nmemonic is required.
-                           
+
     --mnemonic-pw=<pw>   optional password for mnemonic.
-    
+
     --addr-type=<t>      legacy | p2sh-segwit | bech32 | auto
                             default = auto  (based on key-type)
-    
+
     --key-type=<t>       x | y | z
                             default = x. applies to --mnemonic only.
-                            
+
     --coin=<coin>        Coin Symbol ( default = btc )
                          See --helpcoins for a list.
-                         
+
     --helpcoins          List all available coins/networks.
                          --format applies to output.
-    
+
     --numderive=<n>      Number of keys to derive.  default=10
 
     --startindex=<n>     Index to start deriving keys from.  default=0
-                            
+
     --cols=<cols>        a csv list of columns, or "all"
                          all:
                           (path,address,xprv,xpub,privkey,pubkey,pubkeyhash,index)
@@ -731,14 +731,14 @@ The report may be printed in the following formats:
                            legacy|cash   default=cash
     --alt-extended=<id>  Use alternate extended keys. supported:
                            LTC:  Ltub
-                           
+
     --outfile=<path>     specify output file path.
     --format=<format>    txt|md|csv|json|jsonpretty|html|list|all   default=txt
-    
+
                          if 'all' is specified then a file will be created
                          for each format with appropriate extension.
                          only works when outfile is specified.
-                         
+
                          'list' prints only the first column. see --cols
 
     --path=<path>        bip32 path to derive, relative to provided key (m).
@@ -760,11 +760,11 @@ The report may be printed in the following formats:
     --gen-words=<n>     num words to generate. implies --gen-key.
                            one of: [12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48]
                            default = 24.
-    
+
     --logfile=<file>    path to logfile. if not present logs to stdout.
     --loglevel=<level>  debug,info,specialinfo,warning,exception,fatalerror
                           default = info
-    
+
 ```
 
 
