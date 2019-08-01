@@ -376,7 +376,7 @@ class PathPreset_electrum {
     }
 
     public function getPath() : string {
-        return "m/44'/c'/a'/v/x";
+        return "m/v/x";
     }
     
     public function getWalletSoftwareName() : string {
@@ -384,31 +384,7 @@ class PathPreset_electrum {
     }
     
     public function getWalletSoftwareVersionInfo() : string {
-        return '2.6+';
-    }
-    
-    public function getNote() : string {
-        return 'Bip44';
-    }
-}
-
-
-class PathPreset_electrum_legacy {
-    
-    public function getID() : string {
-        return str_replace('App\Utils\PathPreset_', '', get_class($this));
-    }
-
-    public function getPath() : string {
-        return "m/v/x";
-    }
-    
-    public function getWalletSoftwareName() : string {
-        return 'Electrum (legacy)';
-    }
-    
-    public function getWalletSoftwareVersionInfo() : string {
-        return '2.x < 2.6';
+        return '2.0+';
     }
     
     public function getNote() : string {
@@ -416,7 +392,7 @@ class PathPreset_electrum_legacy {
     }
 }
 
-class PathPreset_electrum_legacy_multi {
+class PathPreset_electrum_multi {
     
     public function getID() : string {
         return str_replace('App\Utils\PathPreset_', '', get_class($this));
@@ -427,11 +403,11 @@ class PathPreset_electrum_legacy_multi {
     }
     
     public function getWalletSoftwareName() : string {
-        return 'Electrum (legacy multi)';
+        return 'Electrum multi';
     }
     
     public function getWalletSoftwareVersionInfo() : string {
-        return '2.x < 2.6';
+        return '2.0+';
     }
     
     public function getNote() : string {

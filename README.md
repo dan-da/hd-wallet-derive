@@ -114,8 +114,7 @@ copay
 copay_hardware_multisig
 copay_legacy
 electrum
-electrum_legacy
-electrum_legacy_multi
+electrum_multi
 hive
 jaxx
 ledgerlive
