@@ -155,7 +155,7 @@ class Util
         }
 
         $params['bch-format'] = @$params['bch-format'] ?: 'cash';
-        $params['numderive'] = @$params['numderive'] ?: 10;
+        $params['numderive'] = isset($params['numderive']) ? $params['numderive'] : 10;
         $params['alt-extended'] = @$params['alt-extended'] ?: null;
         $params['startindex'] = @$params['startindex'] ?: 0;
         $params['includeroot'] = isset($params['includeroot'] );
