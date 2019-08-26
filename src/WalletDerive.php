@@ -129,16 +129,16 @@ class WalletDerive
         $path_mask = str_replace('v', @$params['path-change'], $path_mask);
         $path_mask = str_replace('a', @$params['path-account'], $path_mask);
         
-        for($i = $start; $i < $end; $i++)
+        for($i = 0; $i < ($end - $start); $i++)
         {
-            if($i && $i % 10 == 0)
+            if($i && ($i + 1) % 10 == 0)
             {
-                MyLogger::getInstance()->log( "Generated $i keys", MyLogger::specialinfo );
+                MyLogger::getInstance()->log( "Generated ". ($i + 1) ." keys", MyLogger::specialinfo );
             }
-            $path = sprintf($path_mask, $i);
+            $path = sprintf($path_mask, $i + $start);
             $key = $master->derivePath($path);
             
-            $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i, $path);
+            $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i + $start, $path);
         }
 
         return $addrs;
