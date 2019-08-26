@@ -91,6 +91,7 @@ class WalletDerive
 
         $start = $params['startindex'];
         $end = $params['startindex'] + $params['numderive'];
+        $numderive = $params['numderive'];
 
         /*
          *  ROOT PATH INCLUSION
@@ -99,7 +100,7 @@ class WalletDerive
             $this->derive_key_worker($coin, $symbol, $network, $addrs, $master, $key_type, null, 'm');
         }
 
-        MyLogger::getInstance()->log( "Generating addresses", MyLogger::info );
+        MyLogger::getInstance()->log( "Deriving keys", MyLogger::info );
         $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
         
         // Allow paths to end with i or i'.
@@ -128,18 +129,25 @@ class WalletDerive
         }
         $path_mask = str_replace('v', @$params['path-change'], $path_mask);
         $path_mask = str_replace('a', @$params['path-account'], $path_mask);
-        
+
+        $count = 0;
+        $period_start = time();
         for($i = $start; $i < $end; $i++)
         {
-            if($i && $i % 10 == 0)
-            {
-                MyLogger::getInstance()->log( "Generated $i keys", MyLogger::specialinfo );
-            }
             $path = sprintf($path_mask, $i);
             $key = $master->derivePath($path);
             
             $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i, $path);
+            
+            $count = $i + 1;
+            if(time() - $period_start > 10)
+            {
+                $pct = round($count / $numderive * 100, 2);
+                MyLogger::getInstance()->log( "Derived $count of $numderive keys.  ($pct%)", MyLogger::specialinfo );
+                $period_start = time();
+            }
         }
+        MyLogger::getInstance()->log( "Derived $count keys", MyLogger::info );
 
         return $addrs;
     }
@@ -467,7 +475,7 @@ class WalletDerive
                 $row[$pf . 'path'] = null;
                 $row['xprv'] = null;
                 $row['xpub'] = null;
-                $row['comment'] = "Bip44 ID is missing for this coin, so extended keys not generated.";
+                $row['comment'] = "Bip44 ID is missing for this coin, so extended keys not derived.";
             }
             $rows[] = $row;
         }
