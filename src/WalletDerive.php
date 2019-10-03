@@ -194,6 +194,53 @@ class WalletDerive
         return $hex ? '0x' . $key->getHex() : $key->toWif($network);
     }
 
+    /**
+     * Get extended public keys from a given key in all available formats
+     */
+    function getExtendedPublicKeys($key) {
+        $params = $this->get_params();
+        $coin = $params['coin'];
+        list($symbol) = explode('-', $coin);
+
+        $networkCoinFactory = new NetworkCoinFactory();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);
+
+        // get initial key type for the coin
+        $initial_key_type = $this->getKeyTypeFromCoinAndKey($coin, $key);
+
+        // store results here
+        $extkeys = array();
+
+        // try to generate xpub address
+        $key_type = 'x';
+        $this->params['addr-type'] = 'legacy';
+        // generate the master key for the given type from the initial type
+        $master = $this->fromExtended($coin, $key, $network, $initial_key_type);
+        if ( $this->networkSupportsKeyType($network, $key_type, $coin ) && method_exists($master, 'getPublicKey') ) {
+            $extkeys[] = array( 'xpub' => $this->toExtendedKey($coin, $master->withoutPrivateKey(), $network, $key_type));
+        }
+
+        // try to generate ypub address
+        $key_type = 'y';
+        $this->params['addr-type'] = 'p2sh-segwit';
+        // regenerate the master key for the given type from the initial type
+        $master = $this->fromExtended($coin, $key, $network, $initial_key_type);
+        if ( $this->networkSupportsKeyType($network, $key_type, $coin ) && method_exists($master, 'getPublicKey') ) {
+            $extkeys[] = array( 'ypub' => $this->toExtendedKey($coin, $master->withoutPrivateKey(), $network, $key_type));
+        }
+
+        // try to generate zpub address
+        $key_type = 'z';
+        $this->params['addr-type'] = 'bech32';
+        // regenerate the master key for the given type from the initial type
+        $master = $this->fromExtended($coin, $key, $network, $initial_key_type);
+        if ( $this->networkSupportsKeyType($network, $key_type, $coin ) && method_exists($master, 'getPublicKey') ) {
+            $extkeys[] = array( 'zpub' => $this->toExtendedKey($coin, $master->withoutPrivateKey(), $network, $key_type));
+        }
+
+        return $extkeys;
+    }
     
     private function address($key, $network) {
         $addrCreator = new AddressCreator();

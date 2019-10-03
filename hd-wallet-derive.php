@@ -50,6 +50,12 @@ function main()
             return 0;
         }
 
+        if (@$params['get-extended']) {
+            $result = $walletDerive->getExtendedPublicKeys($key);
+            WalletDeriveReport::printResults($params, $result);
+            return 0;
+        }
+
         // Key derived from mnemonic if mnemonic is choosen
         if( !@$params['key'] && @$params['mnemonic'] && !@$orig_params['path'] && !@$orig_params['preset']) {
             $path = $walletDerive->getCoinBip44ExtKeyPathPurposeByKeyType($params['coin'], $params['key-type']);
