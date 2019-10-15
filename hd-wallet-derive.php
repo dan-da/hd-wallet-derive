@@ -50,12 +50,6 @@ function main()
             return 0;
         }
 
-        if (@$params['get-extended']) {
-            $result = $walletDerive->getExtendedPublicKeys($key);
-            WalletDeriveReport::printResults($params, $result);
-            return 0;
-        }
-
         // Key derived from mnemonic if mnemonic is choosen
         if( !@$params['key'] && @$params['mnemonic'] && !@$orig_params['path'] && !@$orig_params['preset']) {
             $path = $walletDerive->getCoinBip44ExtKeyPathPurposeByKeyType($params['coin'], $params['key-type']);
@@ -68,6 +62,13 @@ function main()
             }
         }
         $key = @$params['key'] ?: $walletDerive->mnemonicToKey($params['coin'], $params['mnemonic'], $params['key-type'], $params['mnemonic-pw']);
+        
+        if (@$params['gen-extended']) {
+            $result = $walletDerive->getExtendedPublicKeys($key);
+            WalletDeriveReport::printResults($params, $result, true);
+            return 0;
+        }
+
         $addrs = $walletDerive->derive_keys($key);
 
         // Prints result

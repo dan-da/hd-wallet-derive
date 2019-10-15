@@ -35,7 +35,7 @@ class Util
             'list-cols',
             'bch-format:',
             'alt-extended:',
-            'gen-key', 'gen-key-all',
+            'gen-key', 'gen-key-all', 'gen-extended',
             'gen-words:',
             'version', 'help', 'help-coins',
             'preset:', 'path-change', 'path-account:', 'help-presets',
@@ -95,6 +95,7 @@ class Util
 
         $params['gen-key'] = isset($params['gen-key']) || isset($params['gen-words']);
         $params['gen-key-all'] = isset($params['gen-key-all']);  // hidden param, for the truly worthy who read the code.
+        $params['gen-extended'] = isset($params['gen-extended']);
         $key = @$params['key'];
         $mnemonic = @$params['mnemonic'];
 
@@ -284,6 +285,7 @@ class Util
                                                     
     --includeroot       include root key as first element of report.
     --gen-key           generates a new key.
+    --gen-extended      generate the coresponding x, y or z public keys from a provided key
     --gen-words=<n>     num words to generate. implies --gen-key.
                            one of: [$allowed_numwords]
                            default = 24.
