@@ -284,7 +284,7 @@ class MyLogger {
 
         $rc = @exec ( $command, $output, $status );
     
-        $output = implode($output, "\n");
+        $output = implode("\n", $output);
     
         $success = ( $status === 0 ) ? true : false;
         if (!$success) {
