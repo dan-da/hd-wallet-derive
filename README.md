@@ -230,7 +230,7 @@ note: The --path argument defaults to the bip44 extended key path when using
 --mnemonic to make address generation easier.  If a Bip44 ID is not defined for
 the coin then --path must be specified explicitly.
 
-you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+you can verify these results [with Ian Coleman's tool](https://iancoleman.io/bip39/).
 
 
 ### With a password
@@ -273,7 +273,7 @@ $ ./hd-wallet-derive.php --key-type=z --mnemonic="refuse brush romance together 
 +-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+note: you can verify these results [with Ian Coleman's tool](https://iancoleman.io/bip39/).
 
 
 ## Derive addresses from xpub key
