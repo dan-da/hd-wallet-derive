@@ -63,6 +63,8 @@ As of version 0.4.1, Bitcoin-core style key derivation is supported.
 
 As of version 0.4.3, [Preset paths](#path-presets) are available for common wallet software.
 
+As of version 0.5.0, PHP 8+ is supported.  Older versions of PHP are not.
+
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
