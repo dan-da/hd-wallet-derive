@@ -23,8 +23,8 @@ class eth extends tests_common {
                    'format' => 'json',
                    ];
         $r =  $this->derive_params( $params );
-        $this->eq( $r['address'], $addr_correct, 'address' );
-        $this->eq( $r['privkey'], $privkey_correct, 'privkey' );
+        $this->eq( @$r['address'], $addr_correct, 'address' );
+        $this->eq( @$r['privkey'], $privkey_correct, 'privkey' );
     }
     
 }

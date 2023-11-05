@@ -29,7 +29,7 @@ class FlexNetwork extends Network {
         // could be made configurable.
         $scripthash = @$prefixes['scripthash2'] ?
                         $prefixes['scripthash2'] : $prefixes['scripthash'];
-                        
+
         $this->base58PrefixMap = [
             self::BASE58_ADDRESS_P2PKH => self::dh(@$params['prefixes']['public']),
             self::BASE58_ADDRESS_P2SH => self::dh($scripthash),
@@ -66,13 +66,13 @@ class FlexNetwork extends Network {
      *  and prepends 0 if necessary to make length an even number.
      */
     static private function th($hex, $prepend_zero = false) {
-        $hex = substr($hex, 2);
+        $hex = @substr($hex, 2);
         $pre = strlen($hex) % 2 == 0 ? '' : '0';
         return $pre . $hex;
     }
     
     static private function dh($dec, $prepend_zero = false) {
-        $hex = dechex($dec);
+        $hex = dechex((int)$dec);
         $pre = strlen($hex) % 2 == 0 ? '' : '0';
         return $pre . $hex;
     }
