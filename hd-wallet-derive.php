@@ -62,6 +62,13 @@ function main()
             }
         }
         $key = @$params['key'] ?: $walletDerive->mnemonicToKey($params['coin'], $params['mnemonic'], $params['key-type'], $params['mnemonic-pw']);
+        
+        if (@$params['gen-extended']) {
+            $result = $walletDerive->getExtendedPublicKeys($key);
+            WalletDeriveReport::printResults($params, $result, true);
+            return 0;
+        }
+
         $addrs = $walletDerive->derive_keys($key);
 
         // Prints result
