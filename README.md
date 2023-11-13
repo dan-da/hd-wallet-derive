@@ -1,15 +1,13 @@
 **hd-wallet-derive is a command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins. Derivation reports show privkey (wif encoded), xprv, xpub, and address.**
 
-**Table of Contents**
-=====================
-
+## Table of Contents
 - [hd-wallet-derive](#hd-wallet-derive)
 - [Path Preset examples.](#path-preset-examples)
   * [Obtaining a list of preset paths.](#obtaining-a-list-of-preset-paths)
   * [Deriving addresses for bitcoin-core using preset path.](#deriving-addresses-for-bitcoin-core-using-preset-path)
   * [Deriving Change addresses for bitcoin-core using preset path.](#deriving-change-addresses-for-bitcoin-core-using-preset-path)
 - [Custom Path examples.](#custom-path-examples)
-  * [using a private (xprv) key, with default columns](#using-a-private--xprv--key--with-default-columns)
+  * [using a private (xprv) key, with default columns](#using-a-private-xprv-key-with-default-columns)
   * [Deriving change addresses and showing all columns.](#deriving-change-addresses-and-showing-all-columns)
   * [Derive addresses from bip39 mnemonic seed words.](#derive-addresses-from-bip39-mnemonic-seed-words)
     + [Without a password](#without-a-password)
@@ -18,13 +16,13 @@
     + [Using zpub extended key for segwit bech32 addresses.](#using-zpub-extended-key-for-segwit-bech32-addresses)
   * [Derive addresses from xpub key](#derive-addresses-from-xpub-key)
   * [We can derive segwit keys](#we-can-derive-segwit-keys)
-    + [ypub / p2sh](#ypub---p2sh)
-    + [zpub / bech32](#zpub---bech32)
+    + [ypub / p2sh](#ypub--p2sh)
+    + [zpub / bech32](#zpub--bech32)
     + [Derive addresses for a bitcoin-core wallet.](#derive-addresses-for-a-bitcoin-core-wallet)
   * [We can easily change up the columns in whatever order we want.](#we-can-easily-change-up-the-columns-in-whatever-order-we-want)
-  * [Let's find what altcoins are supported.](#let-s-find-what-altcoins-are-supported)
+  * [Let's find what altcoins are supported.](#lets-find-what-altcoins-are-supported)
   * [We can view altcoin addresses.](#we-can-view-altcoin-addresses)
-  * [We can easily generate a new random master key, seed and extended keys for any coin.](#we-can-easily-generate-a-new-random-master-key--seed-and-extended-keys-for-any-coin)
+  * [We can easily generate a new random master key, seed and extended keys for any coin.](#we-can-easily-generate-a-new-random-master-key-seed-and-extended-keys-for-any-coin)
   * [Key generation includes segwit keys and their paths.](#key-generation-includes-segwit-keys-and-their-paths)
   * [We can get results in a variety of additional formats](#we-can-get-results-in-a-variety-of-additional-formats)
     + [simple list](#simple-list)
@@ -37,19 +35,20 @@
 - [Segwit notes](#segwit-notes)
 - [Litecoin notes](#litecoin-notes)
   * [xpub vs Ltub keys.](#xpub-vs-ltub-keys)
-  * [Here we see Mtub key and new style 'M' p2sh address.](#here-we-see-mtub-key-and-new-style--m--p2sh-address)
+  * [Here we see Mtub key and new style 'M' p2sh address.](#here-we-see-mtub-key-and-new-style-m-p2sh-address)
   * [And a ttub testnet key](#and-a-ttub-testnet-key)
 - [Privacy and Security implications](#privacy-and-security-implications)
 - [Use at your own risk.](#use-at-your-own-risk)
 - [Output formats](#output-formats)
 - [Usage](#usage)
-- [Installation and Running.](#installation-and-running)
+- [Installation and Running:](#installation-and-running)
+  * [Linux Ubuntu 16.04](#linux-ubuntu-1604)
+  * [MacOS Catalina with homebrew](#macos-catalina-with-homebrew)
   * [install secp256kp1 php extension for big speedup](#install-secp256kp1-php-extension-for-big-speedup)
 - [Thanks](#thanks)
 - [Todos](#todos)
-
-
-# hd-wallet-derive
+---
+## hd-wallet-derive
 A command-line tool that derives bip32 addresses and private keys for Bitcoin and many altcoins.
 
 As of version 0.3.2, over 300 altcoins are available, 97 with bip44 path information.
@@ -79,9 +78,9 @@ re-ordered via command-line.
 
 See also: [hd-wallet-addrs](https://github.com/dan-da/hd-wallet-addrs) -- a tool for finding hd-wallet addresses that have received funds.
 
-# Path Preset examples.
+### Path Preset examples.
 
-## Obtaining a list of preset paths.
+#### Obtaining a list of preset paths.
 
 Let's say we want to derive addresses for bitcoin-core software.  First, we need to find out the preset
 identifier for this software.
@@ -130,7 +129,7 @@ trezor
 wasabi
 ```
 
-## Deriving addresses for bitcoin-core using preset path.
+### Deriving addresses for bitcoin-core using preset path.
 
 Using a preset means that we do not need to know the bip32 path.  We can do:
 
@@ -146,7 +145,7 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 +------------+------------------------------------+
 ```
 
-## Deriving Change addresses for bitcoin-core using preset path.
+### Deriving Change addresses for bitcoin-core using preset path.
 
 We can use the --path-change flag for this.  requires a preset
 with variable 'v' present in the path.
@@ -166,9 +165,9 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 Notice that that 2nd field has changed from 0' to 1'.
 
 
-# Custom Path examples.
+## Custom Path examples.
 
-## using a private (xprv) key, with default columns
+### using a private (xprv) key, with default columns
 
 Here we do not specify a bip32 path or a preset, so addresses will be derived directly from
 this key.
@@ -185,7 +184,7 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 +------+------------------------------------+------------------------------------------------------+
 ```
 
-## Deriving change addresses and showing all columns.
+### Deriving change addresses and showing all columns.
 
 Typically, wallets provide xprv and xpub keys at the wallet root level (eg
 m/0/0/0) and then receive addresses and change addresses are available at the
@@ -213,9 +212,9 @@ $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZG
 +-------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+--------------------------------------------------------------------+-------+
 ```
 
-## Derive addresses from bip39 mnemonic seed words.
+### Derive addresses from bip39 mnemonic seed words.
 
-### Without a password
+#### Without a password
 ```
 $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
 
@@ -232,10 +231,10 @@ note: The --path argument defaults to the bip44 extended key path when using
 --mnemonic to make address generation easier.  If a Bip44 ID is not defined for
 the coin then --path must be specified explicitly.
 
-you can verify these results [with Ian Coleman's tool](https://iancoleman.io/bip39/).
+you can verify these results [with Ian Coleman's tool.](https://iancoleman.io/bip39/)
 
 
-### With a password
+#### With a password
 
 ```
 $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" --mnemonic-pw="mypass" --path="m/44'/0'/0'/0"  -g --includeroot  --numderive=2 --cols=path,address,privkey,pubkey,xprv
@@ -249,7 +248,7 @@ $ ./hd-wallet-derive.php --mnemonic="refuse brush romance together undo document
 +-----------------+------------------------------------+------------------------------------------------------+--------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-### Using ypub extended key for segwit p2sh addresses.
+#### Using ypub extended key for segwit p2sh addresses.
 ```
 $ ./hd-wallet-derive.php --key-type=y --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,xprv
 
@@ -262,7 +261,7 @@ $ ./hd-wallet-derive.php --key-type=y --mnemonic="refuse brush romance together 
 +-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-### Using zpub extended key for segwit bech32 addresses.
+#### Using zpub extended key for segwit bech32 addresses.
 ```
 $ ./hd-wallet-derive.php --key-type=z --mnemonic="refuse brush romance together undo document tortoise life equal trash sun ask" -g --includeroot  --numderive=2 --cols=path,address,xprv
 
@@ -275,10 +274,10 @@ $ ./hd-wallet-derive.php --key-type=z --mnemonic="refuse brush romance together 
 +-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-note: you can verify these results [with Ian Coleman's tool](https://iancoleman.io/bip39/).
+note: you can verify these results [with Ian Coleman's tool.](https://iancoleman.io/bip39/)
 
 
-## Derive addresses from xpub key
+### Derive addresses from xpub key
 
 Addresses can also be derived for a public (xpub) key.  In this case, result fields pertaining to private keys will be empty.
 
@@ -294,9 +293,9 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 +------+------------------------------------+---------+
 ```
 
-## We can derive segwit keys
+### We can derive segwit keys
 
-### ypub / p2sh
+#### ypub / p2sh
 ```
 $ ./hd-wallet-derive.php --key=yprvALsZfj564Q4XBd6aaAJ3sA1BVBhEw9Q8Xn7x9jFeMku6u2y6kRFdaDVFsdj9d8zuAdvwH5id6VJ5xKdwGJgMyx292kcJigqNdic2piwqAuL --numderive=3 --cols=path,address -g
 
@@ -309,7 +308,7 @@ $ ./hd-wallet-derive.php --key=yprvALsZfj564Q4XBd6aaAJ3sA1BVBhEw9Q8Xn7x9jFeMku6u
 +------+------------------------------------+
 ```
 
-### zpub / bech32
+#### zpub / bech32
 ```
 $ ./hd-wallet-derive.php --key=zprvAfvRyooajPigxomveEuGYUPwB7KLGseATsYbGB63S6wnFvFahfNnkBYmWCjhGmWbh7fJgNZSoUeAu7HcbRqcFtRPf5KXShRj7Sik7GadJrK --numderive=3 --cols=path,address -g
 
@@ -322,7 +321,7 @@ $ ./hd-wallet-derive.php --key=zprvAfvRyooajPigxomveEuGYUPwB7KLGseATsYbGB63S6wnF
 +------+--------------------------------------------+
 ```
 
-### Derive addresses for a bitcoin-core wallet.
+#### Derive addresses for a bitcoin-core wallet.
 
 Here we make use of *--path="m/0'/0'/x'"* to specify hardened address generation
 and *--addr-type=p2sh-segwit* to force generation of p2sh-segwit keys for an xprv key.
@@ -330,7 +329,7 @@ and *--addr-type=p2sh-segwit* to force generation of p2sh-segwit keys for an xpr
 [See here](doc/bitcoin-core-hd.md) for more docs and examples on bitcoin-core derivation.
 
 ```
-$ /home/websites/hd-wallet-derive/hd-wallet-derive.php --path="m/0'/0'/x'" --addr-type=p2sh-segwit --cols=path,address,pubkey --numderive=3 --key=xprv9s21ZrQH143K3KeCJ5DMac7XqmriV7xVDDCV5MNE564bKUF6piF7JK6RWHVJMzQMUBbzxLaV9kNaRMHyjVnjNiLAq2SyvJJBs7ZUg4c9kcy -g
+$ ./hd-wallet-derive.php --path="m/0'/0'/x'" --addr-type=p2sh-segwit --cols=path,address,pubkey --numderive=3 --key=xprv9s21ZrQH143K3KeCJ5DMac7XqmriV7xVDDCV5MNE564bKUF6piF7JK6RWHVJMzQMUBbzxLaV9kNaRMHyjVnjNiLAq2SyvJJBs7ZUg4c9kcy -g
 
 +------------+------------------------------------+--------------------------------------------------------------------+
 | path       | address                            | pubkey                                                             |
@@ -342,7 +341,7 @@ $ /home/websites/hd-wallet-derive/hd-wallet-derive.php --path="m/0'/0'/x'" --add
 ```
 
 
-## We can easily change up the columns in whatever order we want.
+### We can easily change up the columns in whatever order we want.
 
 Just use the --cols parameter.
 
@@ -358,7 +357,7 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 +-----------------------------------------------------------------------------------------------------------------+------------------------------------+
 ```
 
-## Let's find what altcoins are supported.
+### Let's find what altcoins are supported.
 
 ```
 $ ./hd-wallet-derive.php --help-coins
@@ -377,7 +376,7 @@ $ ./hd-wallet-derive.php --help-coins
 
 Note that testnet and regtest are supported for many coins.
 
-## We can view altcoin addresses.
+### We can view altcoin addresses.
 
 ```
 $ ./hd-wallet-derive.php --key=xprv9zbB6Xchu2zRkf6jSEnH9vuy7tpBuq2njDRr9efSGBXSYr1QtN8QHRur28QLQvKRqFThCxopdS1UD61a5q6jGyuJPGLDV9XfYHQto72DAE8 --cols=path,address --coin=ZEC --numderive=3 -g
@@ -391,7 +390,7 @@ $ ./hd-wallet-derive.php --key=xprv9zbB6Xchu2zRkf6jSEnH9vuy7tpBuq2njDRr9efSGBXSY
 +------+-------------------------------------+
 ```
 
-## We can easily generate a new random master key, seed and extended keys for any coin.
+### We can easily generate a new random master key, seed and extended keys for any coin.
 
 ```
 $ ./hd-wallet-derive.php --coin=DOGE --gen-key --format=jsonpretty -g
@@ -408,7 +407,7 @@ $ ./hd-wallet-derive.php --coin=DOGE --gen-key --format=jsonpretty -g
 ]
 ```
 
-## Key generation includes segwit keys and their paths.
+### Key generation includes segwit keys and their paths.
 
 ```
 $ ./hd-wallet-derive.php --gen-key --cols=path,xprv -g
@@ -421,9 +420,9 @@ $ ./hd-wallet-derive.php --gen-key --cols=path,xprv -g
 +---------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-## We can get results in a variety of additional formats
+### We can get results in a variety of additional formats
 
-### simple list
+#### simple list
 
 only the first column will be used.  This is handy for cut/paste operations.
 
@@ -435,7 +434,7 @@ only the first column will be used.  This is handy for cut/paste operations.
 1Pyk8NLx3gaXSng7XhKoNMLfBffUsJGAjr
 ```
 
-### json
+#### json
 
 json can be pretty printed or compact form.
 
@@ -457,7 +456,7 @@ $ ./hd-wallet-derive.php -g --key=xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315
 ]
 ```
 
-### csv
+#### csv
 
 For all the spreadsheet lovers out there.
 
@@ -471,7 +470,7 @@ address,xpub
 ```
 
 
-# How address derivation works
+## How address derivation works
 
 For background, please read [bip32 proposal](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki).
 
@@ -488,7 +487,7 @@ Due to the simplicity of this approach, the tool does not need to know or care a
 bip32 path layouts such as bip44, bip45, etc.
 
 
-# Path Presets
+## Path Presets
 
 Path presets are available for standardized paths and commonly used Bitcoin Wallet software.
 
@@ -501,7 +500,7 @@ Or [view them online](./doc/wallet-bip32-path-presets.md).
 --path and --preset are mutually exlusive, so use one or the other.
 
 
-# Path variables
+## Path variables
 
 Some wallet software supports features such as multiple accounts or even multiple
 cryptocurrencies that share a common bip32 path structure.  The mostly communly used structure
@@ -540,7 +539,7 @@ note: It is possible to use variables in paths passed via the --path argument, b
 shouldn't need to do this as you can directly manipulate every field when using a custom path.
 
 
-# Segwit notes
+## Segwit notes
 
 *Segwit support is considered experimental in this release!*
 
@@ -580,7 +579,7 @@ only and you should never send money to one without first verifying it in your
 wallet software.
 
 
-# Litecoin notes
+## Litecoin notes
 
 LTC went off the rails a bit and did two funky things:
 
@@ -595,7 +594,7 @@ exact same addresses.
 can read old and new style, but will generate new style.  This tool
 generates only new style.
 
-## xpub vs Ltub keys.
+### xpub vs Ltub keys.
 
 notice below that the generated addresses are the same as are the privkey and pubkey but the encoding of the xprv and xpub are different.
 
@@ -625,7 +624,7 @@ an error will be generated.
 The *--alt-extended=Ltub* applies to all LTC operations include key generation,
 key derivation via --key or --mnemonic as well as to LTC testnet and segwit (y,z) keys.
 
-## Here we see Mtub key and new style 'M' p2sh address.
+### Here we see Mtub key and new style 'M' p2sh address.
 ```
 $ ./hd-wallet-derive.php --key-type=y --alt-extended=Ltub --coin=LTC --mnemonic="wagon rail round impulse donor radar escape harsh series"  --numderive=1 --includeroot --cols=path,address,xpub -g
 +-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
@@ -636,7 +635,7 @@ $ ./hd-wallet-derive.php --key-type=y --alt-extended=Ltub --coin=LTC --mnemonic=
 +-----------------+------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-## And a ttub testnet key
+### And a ttub testnet key
 ```
 $ ./hd-wallet-derive.php  --alt-extended=Ltub --coin=LTC-test --mnemonic="wagon rail round impulse donor radar escape harsh series"  --numderive=1 --includeroot --cols=path,address,xpub -g
 
@@ -649,7 +648,7 @@ $ ./hd-wallet-derive.php  --alt-extended=Ltub --coin=LTC-test --mnemonic="wagon 
 ```
 
 
-# Privacy and Security implications
+## Privacy and Security implications
 
 This tool runs locally and does not make any requests to a server.
 This eliminates many forms of leaks and privacy issues.
@@ -670,7 +669,7 @@ Finally, this tool depends on libraries written by other authors and they
 have not been carefully audited for security.  So use at your own risk.
 
 
-# Use at your own risk.
+## Use at your own risk.
 
 The author makes no claims or guarantees of correctness.
 
@@ -679,7 +678,7 @@ incurred before, during, or after the usage, whatsoever the cause, and not to
 hold the software author liable in any manner.
 
 
-# Output formats
+## Output formats
 
 The report may be printed in the following formats:
 * plain      - an ascii formatted table, as above.  intended for humans.
@@ -689,7 +688,7 @@ The report may be printed in the following formats:
 * list       - single column list. for easy cut/paste.  uses first col.
 
 
-# Usage
+## Usage
 
 ```
    hd-wallet-derive.php
@@ -713,9 +712,9 @@ The report may be printed in the following formats:
                             default = x. applies to --mnemonic only.
 
     --coin=<coin>        Coin Symbol ( default = btc )
-                         See --helpcoins for a list.
+                         See --help-coins for a list.
 
-    --helpcoins          List all available coins/networks.
+    --help-coins          List all available coins/networks.
                          --format applies to output.
 
     --numderive=<n>      Number of keys to derive.  default=10
@@ -768,8 +767,8 @@ The report may be printed in the following formats:
 
 ```
 
-
-# Installation and Running.
+## Installation and Running
+### Linux Ubuntu 16.04
 
 Linux Ubuntu 16.04 requirements:
 ```
@@ -789,23 +788,48 @@ Try an example
 $ ./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c
 ```
 
+### MacOS Catalina (with homebrew)
+ MacOS requirements: 
+ 
+ [Install Xcode From App Store](https://apps.apple.com/app/xcode/id497799835?mt=12)
+ * open your terminal.app
+ 
+```
+xcode-select --install
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+brew update
+brew install openldap php composer go
+brew upgrade
+pecl install xdebug
+```
+
+```
+ git clone https://github.com/dan-da/hd-wallet-derive
+ cd hd-wallet-derive
+ composer install --no-interaction --ansi
+ sync
+```
+Try an example on OSX Catalina
+```
+./hd-wallet-derive.php -g --key=xprv9tyUQV64JT5qs3RSTJkXCWKMyUgoQp7F3hA1xzG6ZGu6u6Q9VMNjGr67Lctvy5P8oyaYAL9CAWrUE9i6GoNMKUga5biW6Hx4tws2six3b9c
+```
+
 ## install secp256kp1 php extension for big speedup
 
 It is really slow to generate keys in PHP.  For a huge speedup, you can install the
 secp256k1 extension from:
 
-<a href="https://github.com/Bit-Wasp/secp256k1-php">https://github.com/Bit-Wasp/secp256k1-php</a>
+(https://github.com/Bit-Wasp/secp256k1-php)[https://github.com/Bit-Wasp/secp256k1-php]
 
 
-# Thanks
+## Thanks
 
 A big thank-you to the author of bitwasp/bitcoin-php.  This library does the
 heavy lifting of dealing with deterministic keys and all things bitcoin.
 
 
-# Todos
+## Todos
 
-* refactor under /src and make into a separate lib/package
-for high level derivation operations.
+* refactor under /src and make into a separate lib/package for high level derivation operations.
 * add test cases, ideally for each coin.
 * web frontend, maybe just for xpub keys, or to run locally.
