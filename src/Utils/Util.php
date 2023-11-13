@@ -9,6 +9,7 @@
 namespace App\Utils;
 
 
+use App\Utils\MyLogger;
 use Exception;
 use App\WalletDerive;
 use App\Utils\PathPresets;
@@ -227,9 +228,9 @@ class Util
                             default = x. applies to --mnemonic only.
                             
     --coin=<coin>        Coin Symbol ( default = btc )
-                         See --helpcoins for a list.
+                         See --help-coins for a list.
                          
-    --helpcoins          List all available coins/networks.
+    --help-coins          List all available coins/networks.
                          --format applies to output.
     
     --numderive=<n>      Number of keys to derive.  default=10
