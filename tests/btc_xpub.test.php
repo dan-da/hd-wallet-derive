@@ -15,8 +15,8 @@ class btc_xpub extends tests_common {
         $xprv = 'xprvA19DfBgveHgn7vJLkdhvfnDhrchn8S9PyWTuNxFvqQamejnM3dzNUqm8nueewkAZDHPL5JLEz56xDbRd1CR5MxXQ2bLbjK3nKEsqyWazFU9';
         $xpub = 'xpub6E8a4hDpUfF5LQNorfEw2vASQeYGXtsFLjPWBLfYPk7kXY7VbBJd2e5ceAzn72Ti2x89YsTyYb7wi7T9LSiMPhirdV6gZ7ff8eShQtcKz7q';
         $addrs = [
-            '14sXBG54tcXsMU9QkHQPoKdpGoVT8HWmtG',
-            '16qnjTcGCUA6PorrzhuUCobRV5GKUp6yV8',
+            '3B6Y69iZiEFmneuNC82Xec2uvBhL8uNSvw',
+            'bc1qq8xyswquhhfepa845areyk9j4jamdzsef6huem',
         ];
         
         // check xprv derivation results in correct addresses.
