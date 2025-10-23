@@ -7,11 +7,14 @@ require_once __DIR__  . '/../vendor/autoload.php';
 // For HD-Wallet Key Derivation
 use BitWasp\Bitcoin\Bitcoin;
 use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Key\Deterministic\HierarchicalKey;
+use BitWasp\Bitcoin\Key\Deterministic\HierarchicalKeySequence;
 use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
 use BitWasp\Bitcoin\Crypto\Random\Random;
 use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
 use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
 use Exception;
+use BitWasp\Bitcoin\Exceptions\InvalidDerivationException;
 use App\Utils\NetworkCoinFactory;
 use App\Utils\MyLogger;
 use App\Utils\CashAddress;
@@ -101,7 +104,7 @@ class WalletDerive
         }
 
         MyLogger::getInstance()->log( "Deriving keys", MyLogger::info );
-        $path_base = is_numeric( $params['path']{0} ) ?  'm/' . $params['path'] : $params['path'];
+        $path_base = is_numeric( $params['path'][0] ) ?  'm/' . $params['path'] : $params['path'];
         
         // Allow paths to end with i or i'.
         // i' specifies that addresses should be hardened.
@@ -135,8 +138,9 @@ class WalletDerive
         for($i = $start; $i < $end; $i++)
         {
             $path = sprintf($path_mask, $i);
-            $key = $master->derivePath($path);
-            
+
+            // $key = $master->derivePath($path);
+            $key = $this->derive_path($master, $path);
             $this->derive_key_worker($coin, $symbol, $network, $addrs, $key, $key_type, $i, $path);
             
             $count = $i + 1;
@@ -150,6 +154,32 @@ class WalletDerive
         MyLogger::getInstance()->log( "Derived $count keys", MyLogger::info );
 
         return $addrs;
+    }
+
+    // This function is a replacement for HierarchicalKey::derivePath()
+    // since that function now accepts only relative paths.
+    //
+    // This function is exactly the same except it will detect if first
+    // char is 'm' or 'M' and then will call decodeAbsolute() instead.
+    private function derive_path($key, string $path): HierarchicalKey {
+        $sequences = new HierarchicalKeySequence();
+        $is_abs = in_array(@$path[0], ['m', 'M']);
+        $parts = $is_abs ? @$sequences->decodeAbsolute($path)[1] : $sequences->decodeRelative($path);
+        $numParts = count($parts);
+
+        for ($i = 0; $i < $numParts; $i++) {
+            try {
+                $key = $key->deriveChild($parts[$i]);
+            } catch (InvalidDerivationException $e) {
+                if ($i === $numParts - 1) {
+                    throw new InvalidDerivationException($e->getMessage());
+                } else {
+                    throw new InvalidDerivationException("Invalid derivation for non-terminal index: cannot use this path!");
+                }
+            }
+        }
+
+        return $key;
     }
     
     private function derive_key_worker($coin, $symbol, $network, &$addrs, $key, $key_type, $index, $path) {
@@ -194,6 +224,36 @@ class WalletDerive
         return $hex ? '0x' . $key->getHex() : $key->toWif($network);
     }
 
+    /**
+     * Get extended public keys from a given key in all available formats
+     */
+    public function getExtendedPublicKeys($key) {
+        $params = $this->get_params();
+        $coin = $params['coin'];
+        list($symbol) = explode('-', $coin);
+        $networkCoinFactory = new NetworkCoinFactory();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);
+        // get initial key type for the coin
+        $initial_key_type = $this->getKeyTypeFromCoinAndKey($coin, $key);
+        $addrTypes = [
+            'x' => 'legacy',
+            'y' => 'p2sh-segwit',
+            'z' => 'bech32'
+        ];
+        $types = ['x', 'y', 'z'];
+        $extkeys = array();
+        foreach ($types as $type) {
+            $this->params['addr-type'] = $addrTypes[$type];
+            $key_type = $type;
+            $xyzPub = $type . 'pub';
+            $master = $this->fromExtended($coin, $key, $network, $initial_key_type);
+            if ( $this->networkSupportsKeyType($network, $key_type, $coin ) && method_exists($master, 'getPublicKey') ) {
+                $extkeys[] = [ $xyzPub => $this->toExtendedKey($coin, $master->withoutPrivateKey(), $network, $key_type)];
+            }
+        }
+        return $extkeys;
+    }
     
     private function address($key, $network) {
         $addrCreator = new AddressCreator();
@@ -214,6 +274,9 @@ class WalletDerive
 
         $ext = $this->getExtendedPrefixes($coin);
         foreach($ext as $kt => $info) {
+            if(!is_array($info)) {
+                continue;
+            }
             if( $key_prefix  == strtolower(@$info['public']) ) {
                 return $kt[0];
             }
@@ -234,7 +297,6 @@ class WalletDerive
 
         $prefix = $this->getScriptPrefixForKeyType($coin, $key_type);
         $config = new GlobalPrefixConfig([new NetworkConfig($network, [$prefix]),]);
-//print_r($config); exit;  
         
         $serializer = new Base58ExtendedKeySerializer(new ExtendedKeySerializer($adapter, $config));
         return $serializer;
@@ -278,6 +340,9 @@ class WalletDerive
         $val = $val ?: [];
         // ensure no entries with empty values.
         foreach($val as $k => $v) {
+            if(!is_array($v)) {
+                continue;
+            }
             if(!@$v['public'] || !@$v['private']) {
                 unset($val[$k]);
             }
@@ -464,7 +529,8 @@ class WalletDerive
             $bip32path = $this->getCoinBip44ExtKeyPathPurpose($coin, $purpose);
             if($bip32path) {
                 // derive extended priv/pub keys.
-                $prv = $xkey->derivePath($bip32path);
+                // $prv = $xkey->derivePath($bip32path);
+                $prv = $this->derive_path($xkey, $bip32path);
                 $pub = $prv->withoutPrivateKey();
                 $row[$pf . 'path'] = $bip32path;
                 $row['xprv'] = $this->toExtendedKey($coin, $prv, $network, $key_type);

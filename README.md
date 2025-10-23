@@ -63,6 +63,8 @@ As of version 0.4.1, Bitcoin-core style key derivation is supported.
 
 As of version 0.4.3, [Preset paths](#path-presets) are available for common wallet software.
 
+As of version 0.5.0, PHP 8+ is supported.  Older versions of PHP are not.
+
 Derivation reports show privkey (wif encoded), xprv, xpub, and address.
 
 Input can be a xprv key, xpub key, or bip39 mnemonic string (eg 12 words) with
@@ -230,7 +232,7 @@ note: The --path argument defaults to the bip44 extended key path when using
 --mnemonic to make address generation easier.  If a Bip44 ID is not defined for
 the coin then --path must be specified explicitly.
 
-you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+you can verify these results [with Ian Coleman's tool](https://iancoleman.io/bip39/).
 
 
 ### With a password
@@ -273,7 +275,7 @@ $ ./hd-wallet-derive.php --key-type=z --mnemonic="refuse brush romance together 
 +-----------------+--------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 ```
 
-note: you can verify these results [with this tool](https://iancoleman.github.io/bip39/).
+note: you can verify these results [with Ian Coleman's tool](https://iancoleman.io/bip39/).
 
 
 ## Derive addresses from xpub key

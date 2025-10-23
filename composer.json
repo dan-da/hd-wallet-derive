@@ -2,13 +2,14 @@
     "name": "dan-da/hd-wallet-derive",
     "minimum-stability": "dev",
     "require": {
-        "bitwasp/bitcoin": "dev-master#8782bc6c470e342d4e0cb67eb036974f133b950b",
         "ext-json": "*",
-        "php": ">=5.5",
+        "ext-gmp": "*",
+        "php": ">=8",
         "dan-da/texttable-php": "1.0.3",
-        "dan-da/strictmode-php": "1.0.1",
+        "dan-da/strictmode-php": "^1.0.2",
         "dan-da/coinparams": "0.2.9",
-        "olegabr/keccak": "1.0.4"
+        "olegabr/keccak": "1.0.4",
+        "protonlabs/bitcoin": "dev-main"
     },
 
     "require-dev": {
