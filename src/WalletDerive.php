@@ -39,6 +39,10 @@ use BitWasp\Bitcoin\Serializer\Key\HierarchicalKey\ExtendedKeySerializer;
 use App\Utils\MultiCoinRegistry;
 use BitWasp\Bitcoin\Network\Slip132\BitcoinRegistry;
 
+// For Taproot support
+use AndKom\Bitcoin\Address\Output\OutputFactory;
+use AndKom\Bitcoin\Address\Taproot;
+
 // For determining key type via Base58 encode/decode
 use BitWasp\Buffertools\Buffer;
 use BitWasp\Buffertools\Parser;
@@ -226,8 +230,55 @@ class WalletDerive
 
     
     private function address($key, $network) {
+        $params = $this->get_params();
+        $addr_type = $params['addr-type'];
+        
+        // Handle Taproot addresses specially using external library
+        // Taproot requires BIP86 tweaking which is not supported by BitWasp
+        if ($addr_type === 'p2tr') {
+            return $this->generateTaprootAddress($key);
+        }
+        
+        // Standard address generation for legacy, p2sh-segwit, and bech32
         $addrCreator = new AddressCreator();
         return $key->getAddress($addrCreator)->getAddress($network);
+    }
+    
+    /**
+     * Generate Taproot address using the andkom/php-bitcoin-address library
+     * Implements BIP86 single-signature Taproot (P2TR) address generation
+     */
+    private function generateTaprootAddress($key) {
+        try {
+            // Get the public key from the hierarchical key
+            $publicKey = $key->getPublicKey();
+            $pubKeyHex = $publicKey->getHex();
+            
+            // Convert hex to binary for the Taproot library
+            $pubKeyBinary = hex2bin($pubKeyHex);
+            
+            // Use Taproot::construct() with empty merkle root for BIP86 (single-sig Taproot)
+            // This performs the correct BIP86 tweaking: Q = P + hash(P.x) * G
+            $tweakedX = Taproot::construct($pubKeyBinary, ''); // Empty merkle root for BIP86
+            
+            // Generate P2TR address using the properly tweaked X coordinate
+            $address = OutputFactory::p2tr($tweakedX)->address();
+            
+            return $address;
+        } catch (Exception $e) {
+            MyLogger::getInstance()->log("Error generating Taproot address: " . $e->getMessage(), MyLogger::error);
+            throw new Exception("Failed to generate Taproot address: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Get P2TR factory for compatibility with existing code
+     * For Taproot, we use P2PKH factory for key derivation but handle address generation specially
+     */
+    private function getP2trFactory() {
+        $helper = new KeyToScriptHelper(Bitcoin::getEcAdapter());
+        // Use P2PKH factory for key derivation - Taproot addresses are generated separately
+        return $helper->getP2pkhFactory();
     }
 
     /*
@@ -329,6 +380,10 @@ class WalletDerive
                 return false;
             }
         }
+        if($key_type == 'p') {
+            // Taproot uses xpub prefixes, so check if xpub is supported
+            $key_type = 'x';
+        }
         $nparams = $this->getNetworkParams($coin);
         $ext_prefixes = $this->getExtendedPrefixes($coin);
         $mcr = new MultiCoinRegistry($ext_prefixes);  // todo: cache these objects.
@@ -345,6 +400,7 @@ class WalletDerive
             case 'legacy':      return $helper->getP2pkhFactory();
             case 'p2sh-segwit': return $helper->getP2shFactory($helper->getP2wpkhFactory());
             case 'bech32':      return $helper->getP2wpkhFactory();
+            case 'p2tr':     return $this->getP2trFactory();
             case 'auto': break;  // use automatic detection based on key_type
             default:
                 throw new Exception('Invalid value for addr_type');
@@ -359,6 +415,7 @@ class WalletDerive
             case 'Y': $factory = $helper->getP2shP2wshFactory($helper->getP2pkhFactory()); break;
             case 'z': $factory = $helper->getP2wpkhFactory(); break;
             case 'Z': $factory = $helper->getP2wshFactory($helper->getP2pkhFactory()); break;
+            case 'p': $factory = $this->getP2trFactory(); break;  // BIP86 Taproot (P2TR)
             default:
                 throw new Exception("Unknown key type: $key_type");
         }
@@ -389,6 +446,7 @@ class WalletDerive
             case 'legacy':      return $slip132->p2pkh($coinPrefixes);
             case 'p2sh-segwit': return $slip132->p2shP2wpkh($coinPrefixes);
             case 'bech32':      return $slip132->p2wpkh($coinPrefixes);
+            case 'p2tr':        return $slip132->p2pkh($coinPrefixes); // Taproot uses xpub prefix
             case 'auto': break;  // use automatic detection based on key_type
             default:
                 throw new Exception('Invalid value for addr_type');
@@ -402,6 +460,7 @@ class WalletDerive
             case 'Y': $prefix = $slip132->p2shP2wshP2pkh($coinPrefixes); break;
             case 'z': $prefix = $slip132->p2wpkh($coinPrefixes); break;
             case 'Z': $prefix = $slip132->p2wshP2pkh($coinPrefixes); break;
+            case 'p': $prefix = $slip132->p2pkh($coinPrefixes); break;  // BIP86 Taproot uses xpub prefix
             default:
                 throw new Exception("Unknown key type: $key_type");
         }
@@ -470,6 +529,7 @@ class WalletDerive
         $key_types = ['x'  => 44,
                       'y'  => 49,
                       'z'  => 84,
+                      'p'  => 86,    // BIP86 Taproot (P2TR)
 //                      'Y'  => ??,    // multisig
 //                      'Z'  => ??,    // multisig
                      ];
@@ -562,6 +622,7 @@ class WalletDerive
         $map = ['x' => 44,
                 'y' => 49,
                 'z' => 84,
+                'p' => 86,    // BIP86 Taproot (P2TR)
                 'Y' => 141,
                 'Z' => 141,
                ];
@@ -569,7 +630,16 @@ class WalletDerive
     }
 
     public function getCoinBip44ExtKeyPathPurposeByKeyType($coin, $key_type) {
-        $purpose = $this->getBip32PurposeByKeyType($key_type);
+        $params = $this->get_params();
+        $addr_type = $params['addr-type'];
+        
+        // For Taproot addresses, use BIP86 (purpose 86) regardless of key type
+        if ($addr_type === 'p2tr') {
+            $purpose = 86; // BIP86 for Taproot
+        } else {
+            $purpose = $this->getBip32PurposeByKeyType($key_type);
+        }
+        
         return $this->getCoinBip44ExtKeyPathPurpose($coin, $purpose);
     }    
     

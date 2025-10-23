@@ -9,7 +9,8 @@
         "dan-da/strictmode-php": "^1.0.2",
         "dan-da/coinparams": "0.2.9",
         "olegabr/keccak": "1.0.4",
-        "protonlabs/bitcoin": "dev-main"
+        "protonlabs/bitcoin": "dev-main",
+        "andkom/php-bitcoin-address": "^2.0"
     },
 
     "require-dev": {

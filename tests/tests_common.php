@@ -43,12 +43,12 @@ abstract class tests_common extends tester\test_base {
         return $argbuf;
     }
     
-    protected function exec_json($args, $expect_rc=0, $label) {
+    protected function exec_json($args, $expect_rc=0, $label='') {
         $output = $this->exec($args, $expect_rc, $label);
         return json_decode($output, true) ?: [];
     }
     
-    protected function exec($args, $expect_rc=0, $label) {
+    protected function exec($args, $expect_rc=0, $label='') {
         
         $prog = realpath(__DIR__ . '/../hd-wallet-derive.php');
         $cmd = sprintf('%s %s 2>&1', $prog, $args);
