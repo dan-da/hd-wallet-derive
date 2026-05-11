@@ -105,13 +105,13 @@ class Util
         $params['mnemonic-pw'] = @$params['mnemonic-pw'] ?: null;
         
         $params['addr-type'] = @$params['addr-type'] ?: 'auto';
-        $allowed_addr_type = ['legacy', 'p2sh-segwit', 'bech32', 'auto'];
+        $allowed_addr_type = ['legacy', 'p2sh-segwit', 'bech32', 'p2tr', 'auto'];
         if(!in_array($params['addr-type'], $allowed_addr_type)) {
             throw new Exception(sprintf("--addr-type must be one of: [%s]", implode('|', $allowed_addr_type)));
         }
         
         $keytype = @$params['key-type'] ?: 'x';
-        $keytypes = ['x', 'y', 'z'];  // , 'Y', 'Z'];
+        $keytypes = ['x', 'y', 'z'];
         if(!in_array($keytype, $keytypes ) ) {
             throw new Exception( "--key-type must be one of: " . implode(',', $keytypes ));
         }
@@ -221,7 +221,7 @@ class Util
                            
     --mnemonic-pw=<pw>   optional password for mnemonic.
     
-    --addr-type=<t>      legacy | p2sh-segwit | bech32 | auto
+    --addr-type=<t>      legacy | p2sh-segwit | bech32 | p2tr | auto
                             default = auto  (based on key-type)
     
     --key-type=<t>       x | y | z

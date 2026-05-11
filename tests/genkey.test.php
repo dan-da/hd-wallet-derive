@@ -21,7 +21,7 @@ class genkey extends tests_common {
         ];
         
         $rows = $this->derive_params( $params );
-        $this->count_eq( $rows, 3, 'num root keys');
+        $this->count_eq( $rows, 4, 'num root keys');
         
         $row = @$rows[0];
         $this->eq( @$row['coin'], 'BTC', 'symbol' );
@@ -49,5 +49,14 @@ class genkey extends tests_common {
         $this->eq( @$row['path'], "m/84'/0'/0'/0", 'path' );
         $this->starts_with( @$row['xprv'], "zprv", 'xprv' );
         $this->starts_with( @$row['xpub'], "zpub", 'xpub' );
+
+        $row = @$rows[3];
+        $this->eq( @$row['coin'], 'BTC', 'symbol' );
+        $this->not_empty( @$row['seed'], 'seed' );
+        $this->not_empty( @$row['mnemonic'], 'mnemonic' );
+        $this->starts_with( @$row['root-key'], 'xprv', 'root-key' );
+        $this->eq( @$row['path'], "m/86'/0'/0'/0", 'path' );
+        $this->starts_with( @$row['xprv'], "xprv", 'xprv' );
+        $this->starts_with( @$row['xpub'], "xpub", 'xpub' );
     }
 }

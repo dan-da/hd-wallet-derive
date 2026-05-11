@@ -671,5 +671,28 @@ class PathPreset_coinomi_bech32 {
         return 'Bip84';
     }
 }
+
+class PathPreset_bip86 {
+    
+    public function getID() : string {
+        return str_replace('App\Utils\PathPreset_', '', get_class($this));
+    }
+    
+    public function getPath() : string {
+        return "m/86'/c'/a'/v/x";
+    }
+    
+    public function getWalletSoftwareName() : string {
+        return "BIP86";
+    }
+    
+    public function getWalletSoftwareVersionInfo() : string {
+        return "BIP86 - Taproot (P2TR) addresses";
+    }
+    
+    public function getNote() : string {
+        return 'Bip86';
+    }
+}
  
  
