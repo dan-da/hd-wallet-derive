@@ -224,6 +224,36 @@ class WalletDerive
         return $hex ? '0x' . $key->getHex() : $key->toWif($network);
     }
 
+    /**
+     * Get extended public keys from a given key in all available formats
+     */
+    public function getExtendedPublicKeys($key) {
+        $params = $this->get_params();
+        $coin = $params['coin'];
+        list($symbol) = explode('-', $coin);
+        $networkCoinFactory = new NetworkCoinFactory();
+        $network = $networkCoinFactory->getNetworkCoinInstance($coin);
+        Bitcoin::setNetwork($network);
+        // get initial key type for the coin
+        $initial_key_type = $this->getKeyTypeFromCoinAndKey($coin, $key);
+        $addrTypes = [
+            'x' => 'legacy',
+            'y' => 'p2sh-segwit',
+            'z' => 'bech32'
+        ];
+        $types = ['x', 'y', 'z'];
+        $extkeys = array();
+        foreach ($types as $type) {
+            $this->params['addr-type'] = $addrTypes[$type];
+            $key_type = $type;
+            $xyzPub = $type . 'pub';
+            $master = $this->fromExtended($coin, $key, $network, $initial_key_type);
+            if ( $this->networkSupportsKeyType($network, $key_type, $coin ) && method_exists($master, 'getPublicKey') ) {
+                $extkeys[] = [ $xyzPub => $this->toExtendedKey($coin, $master->withoutPrivateKey(), $network, $key_type)];
+            }
+        }
+        return $extkeys;
+    }
     
     private function address($key, $network) {
         $addrCreator = new AddressCreator();
