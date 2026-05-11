@@ -2,8 +2,6 @@
 
 namespace App;
 
-require_once __DIR__  . '/../vendor/autoload.php';
-
 // For HD-Wallet Key Derivation
 use BitWasp\Bitcoin\Bitcoin;
 use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
